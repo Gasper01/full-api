@@ -1,0 +1,39 @@
+{
+  "name": "rest-api-jwt-roles",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel src -d dist",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.js --exec babel-node --ignore 'public/'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "2.4.3",
+    "cors": "2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "4.18.2",
+    "firebase-admin": "^11.7.0",
+    "helmet": "6.1.5",
+    "joi": "^17.9.2",
+    "jsonwebtoken": "9.0.0",
+    "mongoose": "7.1.0",
+    "morgan": "1.10.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.21.5",
+    "@babel/core": "^7.21.5",
+    "@babel/node": "^7.20.7",
+    "@babel/plugin-transform-modules-commonjs": "^7.21.5",
+    "@babel/preset-env": "^7.21.5",
+    "eslint": "8.39.0",
+    "eslint-config-standard": "17.0.0",
+    "eslint-plugin-import": "2.27.5",
+    "eslint-plugin-n": "15.7.0",
+    "eslint-plugin-promise": "6.1.1",
+    "nodemon": "2.0.22"
+  }
+}
