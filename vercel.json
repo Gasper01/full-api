@@ -1,9 +1,6 @@
 {
   "builds": [
-    { 
-      "src": "dist/index.js",
-      "use": "npm start"
-    },
+    
     {
       "src": "src/**/*",
       "use": "@vercel/static-build",
@@ -11,6 +8,10 @@
         "outputDirectory": "dist",
         "command": "npm run build"
       }
+    },
+    { 
+      "src": "dist/index.js",
+      "use": "npm start"
     }
   ],
   "routes": [
