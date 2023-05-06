@@ -3,15 +3,9 @@
   "builds": [
      {
         "src": "package.json",
-        "use": "@vercel/node",
+        "use": "@vercel/node"
       
-      "config": {
-        "production": {
-          "scripts": {
-            "build": "babel src -d dist"
-          }
-        }
-      }
+      
     }
   ],
   "routes": [
