@@ -2,7 +2,7 @@
   "name": "rest-api-jwt-roles",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "babel src -d dist",
     "start": "node dist/index.js"
