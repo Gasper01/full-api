@@ -3,9 +3,11 @@
   "builds": [
     { "src": "package.json", "use": "@vercel/static-build" }
   ],
+  
   "start": [
     { "src": "package.json", "use": "@vercel/static-start" }
   ],
+
   "routes": [
     { "src": "/(.*)", "dest": "/dist/$1" }
   ]
