@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 //import morgan from 'morgan';
 import { serverMessage } from './config';
 import outputHandler from './middlewares/outputHandler';
@@ -20,5 +21,9 @@ app.get('/', (req, res) => res.send(serverMessage));
 
 // Este middleware se ejecutará solo si ninguna de las rutas anteriores coincide con la URL solicitada
 app.use((req, res) => res.send(outputHandler(404, 'Error')));
-
+app.use(
+  cors({
+    origin: ['https://gas-app-mauve.vercel.app'], // Especifica los orígenes permitidos para las solicitudes
+  }),
+);
 export default app;

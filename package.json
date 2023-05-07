@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "babel index.js -o .vercel_build_output/index.js",
+    "build": "babel index.js -d .vercel_build_output/index.js",
    "start": "node index.js",
-   "dev": "nodemon src/index.js --exec babel-node --ignore 'public/'"
+   "dev": "nodemon index.js --exec babel-node --ignore 'public/'"
 
   },
   "keywords": [],
