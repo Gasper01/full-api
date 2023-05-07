@@ -1,6 +1,5 @@
 import express from 'express';
 //import morgan from 'morgan';
-
 import { serverMessage } from './config';
 import outputHandler from './middlewares/outputHandler';
 import userRoutes from './routes/user.routes';
