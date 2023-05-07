@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "babel index.js -o .vercel_build_output/index.js",
+    "build": "babel index.js -o .vercel_build_output",
    "start": "node index.js",
    "dev": "nodemon index.js --exec babel-node --ignore 'public/'"
 
