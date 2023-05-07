@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "babel src -o dist",
-   "start": "node dist/index.js",
+   "start": "node index.js",
    "dev": "nodemon src/index.js --exec babel-node --ignore 'public/'"
 
   },
