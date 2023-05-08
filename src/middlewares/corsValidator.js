@@ -1,6 +1,6 @@
 import cors from 'cors';
 
-const allowedOrigins = ['gasper1one'];
+const allowedOrigins = ['http://localhost:3000'];
 
 const corsOptions = {
   origin: (origin, callback) => {
