@@ -1,6 +1,6 @@
 import cors from 'cors';
 
-const allowedOrigins = ['https://cib-web.vercel.app'];
+const allowedOrigins = ['gasper1one'];
 
 const corsOptions = {
   origin: (origin, callback) => {
