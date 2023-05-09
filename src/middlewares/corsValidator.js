@@ -7,7 +7,7 @@ const corsOptions = {
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Acceso no permitido'));
+      callback(res.status(404));
     }
   },
 };

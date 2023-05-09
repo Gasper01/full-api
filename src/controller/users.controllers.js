@@ -1,18 +1,17 @@
-import db from '../db/config.connection'
-import outputHandler from '../middlewares/outputHandler'
+import db from '../db/config.connection';
 
 export const getUser = async (req, res) => {
   try {
-    const users = await db.collection('users').get()
+    const users = await db.collection('users').get();
     const data = users.docs.map((doc) => ({
       id: doc.id,
       username: doc.data().username,
       email: doc.data().email,
       password: doc.data().password,
-      rol: doc.data().rol
-    }))
-    return res.send(outputHandler('200', data))
+      rol: doc.data().rol,
+    }));
+    return res.status(200).json(data);
   } catch (error) {
-    return res.send(outputHandler('500', null))
+    return res.status(500);
   }
-}
+};

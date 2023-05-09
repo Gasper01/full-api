@@ -1,15 +1,13 @@
-import outputHandler from './outputHandler'
-
-export default function dataValidateHandler (dataModel) {
+export default function dataValidateHandler(dataModel) {
   return function (req, res, next) {
     try {
-      const { error } = dataModel.validate(req.body)
+      const { error } = dataModel.validate(req.body);
       if (error) {
-        return res.send(outputHandler('400', 'Datos inválidos'))
+        return res.status(400).json({ message: 'Datos inválidos' });
       }
-      next()
+      next();
     } catch (error) {
-      res.send(outputHandler('500'))
+      res.status(500);
     }
-  }
+  };
 }
