@@ -4,11 +4,11 @@ import { serverMessage } from './config';
 import userRoutes from './routes/user.routes';
 import productRoutes from './routes/products.routes';
 import authRouter from './routes/auth.routes';
-import corsValidator from './middlewares/corsValidator';
+//import corsValidator from './middlewares/corsValidator';
 const app = express();
 
 // Configuración de CORS
-app.use(corsValidator);
+//app.use(corsValidator);
 
 //app.use(morgan('dev'));
 app.use(express.json());
