@@ -5,5 +5,5 @@ import { verifyRoles } from '../middlewares/verifyRoles';
 const router = Router();
 
 router.get('/', verifyToken, verifyRoles, getUser);
-router.get('/:userId', verifyToken, getUserById);
+router.get('/verfyuser', verifyToken, getUserById);
 export default router;
