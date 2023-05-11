@@ -57,8 +57,9 @@ export const signIn = async (req, res) => {
       sameSite: 'none', // la cookie estará disponible en cualquier sitio web
       path: '/',
     });
- 
-    return res.status(200).json('ok')
+    
+    return res.status(200).json('ok');
+    
   } catch (error) {
     return res.status(500).json({ message: 'An unexpected error occurred on the server' });
   }
