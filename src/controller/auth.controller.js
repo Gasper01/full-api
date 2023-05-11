@@ -50,9 +50,12 @@ export const signIn = async (req, res) => {
 
     const token = Jwt.sign({ id: user.id }, process.env.SECREJWTJSON, { expiresIn: '1h' });
   
-    res.cookie('nombre_de_la_cookie', 'valor_de_la_cookie', {
-      sameSite: 'none',
-      secure: true
+    res.cookie('cookie', token, {
+      maxAge: 3600000, // tiempo de vida de la cookie (en milisegundos)
+      httpOnly: true, // la cookie solo será accesible desde el servidor
+      secure: true, // la cookie solo será enviada a través de HTTPS
+      sameSite: 'none', // la cookie estará disponible en cualquier sitio web
+      path: '/',
     });
  
     return res.status(200).json(token)
