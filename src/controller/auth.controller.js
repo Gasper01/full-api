@@ -50,7 +50,8 @@ export const signIn = async (req, res) => {
 
     const token = Jwt.sign({ id: user.id }, process.env.SECREJWTJSON, { expiresIn: '1h' });
   
-    
+    res.cookie('nombre_de_la_cookie', 'valor_de_la_cookie');
+ 
     return res.status(200).json(token)
   } catch (error) {
     return res.status(500).json({ message: 'An unexpected error occurred on the server' });

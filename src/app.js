@@ -5,8 +5,9 @@ import userRoutes from './routes/user.routes';
 import productRoutes from './routes/products.routes';
 import authRouter from './routes/auth.routes';
 import corsValidator from './middlewares/corsValidator';
+const cookieParser = require('cookie-parser');
 const app = express();
-
+app.use(cookieParser());
 // Configuración de CORS
 app.use(corsValidator);
 
