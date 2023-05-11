@@ -10,6 +10,7 @@ const corsOptions = {
       callback("Error server");
     }
   },
+  credentials: true
 };
 
 export default cors(corsOptions);
