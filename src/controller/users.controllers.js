@@ -28,6 +28,7 @@ export const getUserById = async (req, res) => {
       id: userDoc.id,
       username: userDoc.data().username,
     };
+    
     return res.status(200).json(response);
   } catch (error) {
     return res.status(500);
