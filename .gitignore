@@ -1,6 +1,6 @@
 # Ignora archivos del sistema Mac 
 .DS_store
-
+.package-lock.json
 # Ignora las carpetas 
 node_modules/
 dist/

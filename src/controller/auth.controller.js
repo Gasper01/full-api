@@ -42,15 +42,16 @@ export const signIn = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: 'User not exists' });
     }
-    // const userfont =await user.finndOne({email:req.body.email}).pulpulate("roles")
+    
     const passwordMatch = await userModel.comparePassword(password, user.data().password);
     if (!passwordMatch) {
       return res.status(400).json({ message: 'Password not match' });
     }
 
     const token = Jwt.sign({ id: user.id }, process.env.SECREJWTJSON, { expiresIn: '1h' });
-
-    return res.json({ token });
+  
+    
+    return res.status(200).json(token)
   } catch (error) {
     return res.status(500).json({ message: 'An unexpected error occurred on the server' });
   }

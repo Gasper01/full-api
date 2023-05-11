@@ -16,7 +16,6 @@ export const getUser = async (req, res) => {
   }
 };
 export const getUserById = async (req, res) => {
-  console.log(req.user);
   try {
     const users = db.collection('users').doc(req.userId);
     const userDoc = await users.get();
@@ -31,7 +30,6 @@ export const getUserById = async (req, res) => {
     };
     return res.status(200).json(response);
   } catch (error) {
-    console.log(error);
     return res.status(500);
   }
 };

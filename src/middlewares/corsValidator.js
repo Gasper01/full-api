@@ -7,7 +7,7 @@ const corsOptions = {
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(res.status(404));
+      callback("Error server");
     }
   },
 };

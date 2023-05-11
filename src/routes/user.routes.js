@@ -4,6 +4,6 @@ import { verifyToken } from '../middlewares/verifyJwt';
 import { verifyRoles } from '../middlewares/verifyRoles';
 const router = Router();
 
-router.get('/', verifyToken, verifyRoles, getUser);
-router.get('/verfyuser', verifyToken, getUserById);
+router.get('/', verifyRoles, getUser);
+router.get('/verifyuser', verifyToken, getUserById);
 export default router;
