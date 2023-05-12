@@ -51,6 +51,7 @@ export const signIn = async (req, res) => {
     const token = Jwt.sign({ id: user.id }, process.env.SECREJWTJSON, { expiresIn: '1h' });
   
     res.cookie('cookie', token, {
+      domain: 'cib-web.vercel.app',
       maxAge: 3600000, // tiempo de vida de la cookie (en milisegundos)
       httpOnly: true, // la cookie solo será accesible desde el servidor
       secure: true, // la cookie solo será enviada a través de HTTPS
