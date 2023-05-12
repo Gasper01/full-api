@@ -52,11 +52,10 @@ export const signIn = async (req, res) => {
   
     res.cookie('cib-cookie', token, {
       maxAge: 3600000, // tiempo de vida de la cookie (en milisegundos)
-      httpOnly: true, // la cookie solo será accesible desde el servidor
+      httpOnly:true, // la cookie solo será accesible desde el servidor
       secure: true, // la cookie solo será enviada a través de HTTPS
-      sameSite: 'Strict', // la cookie estará disponible en cualquier sitio web
+      sameSite: 'none', // la cookie estará disponible en cualquier sitio web
       path: '/',
-      
     });
     
     return res.status(200).json('ok');
