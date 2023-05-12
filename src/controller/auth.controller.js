@@ -54,7 +54,7 @@ export const signIn = async (req, res) => {
       maxAge: 3600000, // tiempo de vida de la cookie (en milisegundos)
       httpOnly: true, // la cookie solo será accesible desde el servidor
       secure: true, // la cookie solo será enviada a través de HTTPS
-      sameSite: 'none', // la cookie estará disponible en cualquier sitio web
+      sameSite: 'Strict', // la cookie estará disponible en cualquier sitio web
       path: '/',
     });
     
