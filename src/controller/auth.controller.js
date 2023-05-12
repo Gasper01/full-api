@@ -56,6 +56,7 @@ export const signIn = async (req, res) => {
       secure: true, // la cookie solo será enviada a través de HTTPS
       sameSite: 'Strict', // la cookie estará disponible en cualquier sitio web
       path: '/',
+      
     });
     
     return res.status(200).json('ok');
