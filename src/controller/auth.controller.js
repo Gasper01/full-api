@@ -50,9 +50,9 @@ export const signIn = async (req, res) => {
 
     const token = Jwt.sign({ id: user.id }, process.env.SECREJWTJSON, { expiresIn: '1h' });
   
-    res.cookie('cookie', token, {
+    res.cookie('cib-cookie', token, {
       maxAge: 3600000, // tiempo de vida de la cookie (en milisegundos)
-      httpOnly: false, // la cookie solo será accesible desde el servidor
+      httpOnly: true, // la cookie solo será accesible desde el servidor
       secure: true, // la cookie solo será enviada a través de HTTPS
       sameSite: 'Strict', // la cookie estará disponible en cualquier sitio web
       path: '/',
