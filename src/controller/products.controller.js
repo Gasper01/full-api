@@ -1,12 +1,13 @@
 import db from '../db/config.connection';
+
 export const createProduct = async (req, res) => {
-  const { titulo } = req.body;
+  const { nombre } = req.body;
   try {
     const newProduct = {
-      titulo,
+      nombre,
     };
     await db.collection('products').add(newProduct);
-    return res.status(200);
+    return res.status(200).json("ok");
   } catch (error) {
     return res.status(500);
   }
@@ -17,7 +18,7 @@ export const getProducts = async (req, res) => {
     const products = await db.collection('products').get();
     const response = products.docs.map((doc) => ({
       id: doc.id,
-      titulo: doc.data().titulo,
+      nombre: doc.data().nombre,
     }));
     return res.status(200).json(response);
   } catch (error) {
@@ -36,7 +37,7 @@ export const getProductsById = async (req, res) => {
 
     const response = {
       id: productsDoc.id,
-      titulo: productsDoc.data().titulo,
+      nombre: productsDoc.data().nombre,
     };
 
     return res.status(200).json(response);
@@ -54,11 +55,11 @@ export const updateProductById = async (req, res) => {
       return res.status(404).json('No product found with id');
     }
 
-    const titulo = req.body;
+    const nombre = req.body;
 
-    await products.update(titulo);
+    await products.update(nombre);
 
-    return res.status(200);
+    return res.status(200).json('ok');
   } catch (error) {
     return res.status(500);
   }
@@ -79,3 +80,31 @@ export const deleteProductById = async (req, res) => {
     return res.status(500);
   }
 };
+export const searchProduct = async (req, res) => {
+  try {
+    const { search } = req.params; // Obtener el término de búsqueda desde los parámetros de la URL
+
+    let productsRef = db.collection('products');
+
+    if (search) {
+      productsRef = productsRef.where('nombre', '>=', search).where('nombre', '<=', search + '\uf8ff');
+    }
+
+    const productsSnapshot = await productsRef.get();
+
+    if (productsSnapshot.empty) {
+      return res.status(404).json({ message: 'No se encontraron productos.' });
+    }
+
+    const response = productsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      nombre: doc.data().nombre,
+      cantidad: doc.data().cantidad,
+    }));
+
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(500).json({ error: 'Ocurrió un error al obtener los productos.' });
+  }
+};
+
