@@ -1,13 +1,17 @@
 import db from '../db/config.connection';
 
 export const createProduct = async (req, res) => {
-  const { nombre } = req.body;
+  const { nombre, cantidad, codigo, unidad } = req.body;
+
   try {
     const newProduct = {
       nombre,
+      cantidad,
+      codigo,
+      unidad,
     };
     await db.collection('products').add(newProduct);
-    return res.status(200).json("ok");
+    return res.status(200).json('ok');
   } catch (error) {
     return res.status(500);
   }
@@ -80,6 +84,7 @@ export const deleteProductById = async (req, res) => {
     return res.status(500);
   }
 };
+
 export const searchProduct = async (req, res) => {
   try {
     const { search } = req.params; // Obtener el término de búsqueda desde los parámetros de la URL
@@ -87,7 +92,9 @@ export const searchProduct = async (req, res) => {
     let productsRef = db.collection('products');
 
     if (search) {
-      productsRef = productsRef.where('nombre', '>=', search).where('nombre', '<=', search + '\uf8ff');
+      productsRef = productsRef
+        .where('nombre', '>=', search)
+        .where('nombre', '<=', search + '\uf8ff');
     }
 
     const productsSnapshot = await productsRef.get();
@@ -104,7 +111,8 @@ export const searchProduct = async (req, res) => {
 
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(500).json({ error: 'Ocurrió un error al obtener los productos.' });
+    return res
+      .status(500)
+      .json({ error: 'Ocurrió un error al obtener los productos.' });
   }
 };
-

@@ -1,8 +1,18 @@
 import { Router } from 'express';
 import { signIn, singUp } from '../controller/auth.controller';
+import { verifyRoles } from '../middlewares/verifyRoles';
+import { verifyToken } from '../middlewares/verifyJwt';
+import dataValidateHandler from '../middlewares/dataValidateHandler';
+import userModel from '../models/user.model';
 const router = Router();
 
-router.post('/singup', singUp);
+router.post(
+  '/singup',
+  verifyToken,
+  verifyRoles,
+  dataValidateHandler(userModel.userdata),
+  singUp
+);
 router.post('/signIn', signIn);
 
 export default router;
