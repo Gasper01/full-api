@@ -4,6 +4,7 @@ import { serverMessage } from './config';
 import userRoutes from './routes/user.routes';
 import productRoutes from './routes/products.routes';
 import authRouter from './routes/auth.routes';
+import destinationsRouter from './routes/destination.routes';
 import corsValidator from './middlewares/corsValidator';
 
 const cookieParser = require('cookie-parser');
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use('/user', userRoutes);
 app.use('/admin', authRouter);
 app.use('/products', productRoutes);
+app.use('/destinations', destinationsRouter);
 
 app.get('/', (req, res) => res.send(serverMessage));
 

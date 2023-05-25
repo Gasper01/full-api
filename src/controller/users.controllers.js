@@ -11,7 +11,9 @@ export const getUser = async (req, res) => {
     }));
     return res.status(200).json(data);
   } catch (error) {
-    return res.status(500);
+    return res
+      .status(500)
+      .json({ message: 'An unexpected error occurred on the server' });
   }
 };
 export const getUserById = async (req, res) => {
@@ -33,7 +35,9 @@ export const getUserById = async (req, res) => {
 
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(500);
+    return res
+      .status(500)
+      .json({ message: 'An unexpected error occurred on the server' });
   }
 };
 
@@ -49,6 +53,8 @@ export const deleteUserById = async (req, res) => {
     await users.delete();
     return res.status(200).json('ok');
   } catch (error) {
-    return res.status(500).json('Error server');
+    return res
+      .status(500)
+      .json({ message: 'An unexpected error occurred on the server' });
   }
 };

@@ -31,7 +31,7 @@ export const signIn = async (req, res) => {
     }
 
     const token = Jwt.sign({ id: user.id }, process.env.SECREJWTJSON, {
-      expiresIn: '1h',
+      expiresIn: '5h',
     });
 
     // res.cookie('cib-cookie', token, {
@@ -51,7 +51,7 @@ export const signIn = async (req, res) => {
 };
 
 export const singUp = async (req, res) => {
-  const { imgUrl, username, email, password,rol} = req.body;
+  const { imgUrl, username, email, password, rol } = req.body;
   try {
     // Verificar si el usuario ya existe
     const userExists = await db

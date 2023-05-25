@@ -13,7 +13,9 @@ export const createProduct = async (req, res) => {
     await db.collection('products').add(newProduct);
     return res.status(200).json('ok');
   } catch (error) {
-    return res.status(500);
+    return res
+      .status(500)
+      .json({ message: 'An unexpected error occurred on the server' });
   }
 };
 
@@ -26,7 +28,9 @@ export const getProducts = async (req, res) => {
     }));
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(500);
+    return res
+      .status(500)
+      .json({ message: 'An unexpected error occurred on the server' });
   }
 };
 
@@ -46,7 +50,9 @@ export const getProductsById = async (req, res) => {
 
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(500);
+    return res
+      .status(500)
+      .json({ message: 'An unexpected error occurred on the server' });
   }
 };
 
@@ -65,7 +71,9 @@ export const updateProductById = async (req, res) => {
 
     return res.status(200).json('ok');
   } catch (error) {
-    return res.status(500);
+    return res
+      .status(500)
+      .json({ message: 'An unexpected error occurred on the server' });
   }
 };
 
@@ -79,9 +87,11 @@ export const deleteProductById = async (req, res) => {
     }
 
     await products.delete();
-    return res.status(200);
+    return res.status(200).json('ok');
   } catch (error) {
-    return res.status(500);
+    return res
+      .status(500)
+      .json({ message: 'An unexpected error occurred on the server' });
   }
 };
 
@@ -113,6 +123,6 @@ export const searchProduct = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ error: 'Ocurrió un error al obtener los productos.' });
+      .json({ message: 'An unexpected error occurred on the server' });
   }
 };
