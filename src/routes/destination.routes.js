@@ -7,6 +7,7 @@ import dataValidateHandler from '../middlewares/dataValidateHandler';
 import { createLocations } from '../controller/location.controller';
 import {
   createDestinations,
+  getDestinations,
   getLocationByDestination,
 } from '../controller/destination.contoller';
 
@@ -21,6 +22,7 @@ router.post(
   dataValidateHandler(destinationsModel),
   createDestinations
 );
+router.get('/', verifyToken, verifyRoles, getDestinations);
 router.get('/search', verifyToken, verifyRoles, getLocationByDestination);
 router.post(
   '/locations',

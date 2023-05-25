@@ -15,6 +15,21 @@ export const createDestinations = async (req, res) => {
       .json({ message: 'An unexpected error occurred on the server' });
   }
 };
+export const getDestinations = async (req, res) => {
+  try {
+    const destinations = await db.collection('destinations').get();
+    const response = destinations.docs.map((doc) => ({
+      id: doc.id,
+      destinationName: doc.data().destinationName,
+    }));
+    return res.status(200).json(response);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: 'An unexpected error occurred on the server' });
+  }
+};
+
 export const getLocationByDestination = async (req, res) => {
   const { destinationName } = req.body;
 
