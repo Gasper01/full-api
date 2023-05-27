@@ -23,7 +23,7 @@ router.post(
   createDestinations
 );
 router.get('/', verifyToken, verifyRoles, getDestinations);
-router.get('/search', verifyToken, verifyRoles, getLocationByDestination);
+router.get('/:search', verifyToken, verifyRoles, getLocationByDestination);
 router.post(
   '/locations',
   verifyToken,

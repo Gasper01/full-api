@@ -31,12 +31,10 @@ export const getDestinations = async (req, res) => {
 };
 
 export const getLocationByDestination = async (req, res) => {
-  const { destinationName } = req.body;
-
   try {
     const destinationSnapshot = await db
       .collection('destinations')
-      .where('destinationName', '==', destinationName)
+      .where('destinationName', '==', req.params.search)
       .get();
     if (!destinationSnapshot.empty) {
       const destinationDoc = destinationSnapshot.docs[0];
