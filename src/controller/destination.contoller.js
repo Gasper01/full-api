@@ -49,7 +49,7 @@ export const getLocationByDestination = async (req, res) => {
         const response = locationSnapshot.docs.map((doc) => ({
           id: doc.id,
           locationName: doc.data().locationName,
-          accountNumber: doc.data().accountNumber,
+          //    accountNumber: doc.data().accountNumber,
         }));
 
         return res.status(200).json(response);
