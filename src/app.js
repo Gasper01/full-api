@@ -5,8 +5,8 @@ import userRoutes from './routes/user.routes';
 import productRoutes from './routes/products.routes';
 import authRouter from './routes/auth.routes';
 import destinationsRouter from './routes/destination.routes';
+import motoristasRouter from './routes/motoristas.router';
 import corsValidator from './middlewares/corsValidator';
-
 const cookieParser = require('cookie-parser');
 const app = express();
 app.use(cookieParser());
@@ -20,6 +20,7 @@ app.use('/user', userRoutes);
 app.use('/admin', authRouter);
 app.use('/products', productRoutes);
 app.use('/destinations', destinationsRouter);
+app.use('/motoristas', motoristasRouter);
 
 app.get('/', (req, res) => res.send(serverMessage));
 

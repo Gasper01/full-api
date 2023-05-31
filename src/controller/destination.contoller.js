@@ -4,6 +4,17 @@ export const createDestinations = async (req, res) => {
   const { destinationName } = req.body;
 
   try {
+    const destinationNameExists = await db
+      .collection('destinations')
+      .where('destinationName', '==', destinationName)
+      .limit(1)
+      .get();
+
+    if (!destinationNameExists.empty) {
+      // Si el usuario ya existe, devolver un error
+      return res.status(400).json({ message: 'Destinations already exists' });
+    }
+
     const newDestination = {
       destinationName,
     };
@@ -49,7 +60,7 @@ export const getLocationByDestination = async (req, res) => {
         const response = locationSnapshot.docs.map((doc) => ({
           id: doc.id,
           locationName: doc.data().locationName,
-          //    accountNumber: doc.data().accountNumber,
+          accountNumber: doc.data().accountNumber,
         }));
 
         return res.status(200).json(response);

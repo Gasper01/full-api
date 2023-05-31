@@ -11,8 +11,14 @@ import {
   getLocationByDestination,
 } from '../controller/destination.contoller';
 
+import {
+  createMotorista,
+  getMotorista,
+} from '../controller/motorista.controller';
+
 import destinationsModel from '../models/destinations.model';
 import locationModel from '../models/location.model';
+import motoristaModel from '../models/mortorista.model';
 const router = Router();
 
 router.post(
@@ -31,4 +37,13 @@ router.post(
   dataValidateHandler(locationModel),
   createLocations
 );
+router.get('/motoristas/', verifyToken, verifyRoles, getMotorista);
+router.post(
+  '/motoristas',
+  verifyToken,
+  verifyRoles,
+  dataValidateHandler(motoristaModel),
+  createMotorista
+);
+
 export default router;

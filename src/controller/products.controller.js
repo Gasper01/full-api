@@ -4,6 +4,16 @@ export const createProduct = async (req, res) => {
   const { nombre, cantidad, codigo, unidad } = req.body;
 
   try {
+    const productcodigoExists = await db
+      .collection('products')
+      .where('codigo', '==', codigo)
+      .limit(1)
+      .get();
+
+    if (!productcodigoExists.empty) {
+      // Si el usuario ya existe, devolver un error
+      return res.status(400).json({ message: 'product codigo already exists' });
+    }
     const newProduct = {
       nombre,
       cantidad,
