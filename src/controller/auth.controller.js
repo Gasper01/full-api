@@ -76,7 +76,6 @@ export const singUp = async (req, res) => {
 
     return res.status(200).json({ message: 'User created successfully' });
   } catch (error) {
-    console.log(error);
     return res
 
       .status(500)

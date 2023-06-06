@@ -23,7 +23,6 @@ export const createMotorista = async (req, res) => {
     await db.collection('motoristas').add(newmotorista);
     return res.status(200).json('ok');
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json({ message: 'An unexpected error occurred on the server' });

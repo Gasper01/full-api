@@ -5,7 +5,8 @@ import userRoutes from './routes/user.routes';
 import productRoutes from './routes/products.routes';
 import authRouter from './routes/auth.routes';
 import destinationsRouter from './routes/destination.routes';
-import motoristasRouter from './routes/motoristas.router';
+import motoristasRouter from './routes/motoristas.routes';
+import salidasRouter from './routes/salidas.routes';
 import corsValidator from './middlewares/corsValidator';
 const cookieParser = require('cookie-parser');
 const app = express();
@@ -21,7 +22,7 @@ app.use('/admin', authRouter);
 app.use('/products', productRoutes);
 app.use('/destinations', destinationsRouter);
 app.use('/motoristas', motoristasRouter);
-
+app.use('/salidas', salidasRouter);
 app.get('/', (req, res) => res.send(serverMessage));
 
 // Este middleware se ejecutará solo si ninguna de las rutas anteriores coincide con la URL solicitada
