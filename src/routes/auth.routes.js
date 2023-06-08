@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signIn, singUp } from '../controller/auth.controller';
+import { signIn, signUp } from '../controller/auth.controller';
 import { verifyRoles } from '../middlewares/verifyRoles';
 import { verifyToken } from '../middlewares/verifyJwt';
 import dataValidateHandler from '../middlewares/dataValidateHandler';
@@ -11,7 +11,7 @@ router.post(
   verifyToken,
   verifyRoles,
   dataValidateHandler(userModel.userdata),
-  singUp
+  signUp
 );
 router.post('/signIn', signIn);
 

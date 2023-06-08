@@ -4,23 +4,28 @@ export const createMotorista = async (req, res) => {
   const { motoristaName, placa, cars } = req.body;
 
   try {
-    const motoristaNameExists = await db
+    // Verificar si el motorista ya existe
+    const motoristaSnapshotPromise = db
       .collection('motoristas')
       .where('motoristaName', '==', motoristaName)
       .limit(1)
       .get();
 
-    if (!motoristaNameExists.empty) {
-      // Si el usuario ya existe, devolver un error
-      return res.status(400).json({ message: 'motorista already exists' });
+    const [motoristaSnapshot] = await Promise.all([motoristaSnapshotPromise]);
+
+    if (!motoristaSnapshot.empty) {
+      // Si el motorista ya existe, devolver un error
+      return res.status(400).json({ message: 'Motorista already exists' });
     }
 
-    const newmotorista = {
+    const newMotorista = {
       motoristaName,
       placa,
       cars,
     };
-    await db.collection('motoristas').add(newmotorista);
+
+    await db.collection('motoristas').add(newMotorista);
+
     return res.status(200).json('ok');
   } catch (error) {
     return res
@@ -28,13 +33,29 @@ export const createMotorista = async (req, res) => {
       .json({ message: 'An unexpected error occurred on the server' });
   }
 };
+
+// Objeto para almacenar en caché los resultados de las consultas
+const motoristasCache = {};
+
 export const getMotorista = async (req, res) => {
   try {
-    const motoristas = await db.collection('motoristas').get();
-    const response = motoristas.docs.map((doc) => ({
+    // Verificar si los motoristas están en la caché
+    if (motoristasCache.data) {
+      return res.status(200).json(motoristasCache.data);
+    }
+
+    const motoristasSnapshotPromise = db.collection('motoristas').get();
+
+    const [motoristasSnapshot] = await Promise.all([motoristasSnapshotPromise]);
+
+    const response = motoristasSnapshot.docs.map((doc) => ({
       id: doc.id,
       motoristaName: doc.data().motoristaName,
     }));
+
+    // Almacenar los motoristas en la caché
+    motoristasCache.data = response;
+
     return res.status(200).json(response);
   } catch (error) {
     return res
@@ -42,3 +63,4 @@ export const getMotorista = async (req, res) => {
       .json({ message: 'An unexpected error occurred on the server' });
   }
 };
+

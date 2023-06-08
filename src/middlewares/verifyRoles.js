@@ -1,14 +1,30 @@
 import db from '../db/config.connection';
+const roleCache = {};
+
 export const verifyRoles = async (req, res, next) => {
   try {
-    const user = await db.collection('users').doc(req.userId).get();
+    const user = await getUserFromCache(req.userId);
 
-    if (user.data().rol === 'admin') {
+    if (user.rol === 'admin') {
       return next();
     }
 
-    return res.status(403).json({ message: 'User rol Anauthorizes ' });
+    return res.status(403).json({ message: 'User role unauthorized' });
   } catch (error) {
-    return res.status(500).json({ message: 'Anauthorized ' });
+    return res.status(500).json({ message: 'Unauthorized' });
   }
 };
+
+async function getUserFromCache(userId) {
+  if (roleCache[userId]) {
+    return roleCache[userId];
+  }
+
+  const userSnapshot = await db.collection('users').doc(userId).get();
+  const user = userSnapshot.data();
+
+  // Guardar el usuario en la caché
+  roleCache[userId] = user;
+
+  return user;
+}

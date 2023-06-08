@@ -1,5 +1,11 @@
 import db from '../db/config.connection';
 
+// Objeto para almacenar en caché los resultados de las consultas
+
+const productsCache = {};
+
+const productSearchCache = {};
+
 export const createProduct = async (req, res) => {
   const { nombre, cantidad, codigo, unidad } = req.body;
 
@@ -21,6 +27,8 @@ export const createProduct = async (req, res) => {
       unidad,
     };
     await db.collection('products').add(newProduct);
+    productsCache = {};
+
     return res.status(200).json('ok');
   } catch (error) {
     return res
@@ -29,13 +37,27 @@ export const createProduct = async (req, res) => {
   }
 };
 
+
+
 export const getProducts = async (req, res) => {
   try {
-    const products = await db.collection('products').get();
-    const response = products.docs.map((doc) => ({
+    // Verificar si los productos están en la caché
+    if (productsCache.data) {
+      return res.status(200).json(productsCache.data);
+    }
+
+    const productsSnapshotPromise = db.collection('products').get();
+
+    const [productsSnapshot] = await Promise.all([productsSnapshotPromise]);
+
+    const response = productsSnapshot.docs.map((doc) => ({
       id: doc.id,
       nombre: doc.data().nombre,
     }));
+
+    // Almacenar los productos en la caché
+    productsCache.data = response;
+
     return res.status(200).json(response);
   } catch (error) {
     return res
@@ -44,13 +66,22 @@ export const getProducts = async (req, res) => {
   }
 };
 
+
 export const getProductsById = async (req, res) => {
   try {
-    const products = db.collection('products').doc(req.params.productId);
-    const productsDoc = await products.get();
+    const productId = req.params.productId;
+
+    // Verificar si el producto está en la caché
+    if (productsCache[productId]) {
+      return res.status(200).json(productsCache[productId]);
+    }
+
+    const productsDocPromise = db.collection('products').doc(productId).get();
+
+    const [productsDoc] = await Promise.all([productsDocPromise]);
 
     if (!productsDoc.exists) {
-      return res.status(403).json('No product found with id ');
+      return res.status(403).json('No product found with id');
     }
 
     const response = {
@@ -58,6 +89,9 @@ export const getProductsById = async (req, res) => {
       nombre: productsDoc.data().nombre,
     };
 
+    // Almacenar el producto en la caché
+    productsCache[productId] = response;
+
     return res.status(200).json(response);
   } catch (error) {
     return res
@@ -65,6 +99,7 @@ export const getProductsById = async (req, res) => {
       .json({ message: 'An unexpected error occurred on the server' });
   }
 };
+
 
 export const updateProductById = async (req, res) => {
   try {
@@ -78,7 +113,8 @@ export const updateProductById = async (req, res) => {
     const nombre = req.body;
 
     await products.update(nombre);
-
+   productsCache = {};
+   productSearchCache = {};
     return res.status(200).json('ok');
   } catch (error) {
     return res
@@ -97,6 +133,8 @@ export const deleteProductById = async (req, res) => {
     }
 
     await products.delete();
+    productsCache = {};
+    productSearchCache = {};
     return res.status(200).json('ok');
   } catch (error) {
     return res
@@ -109,6 +147,11 @@ export const searchProduct = async (req, res) => {
   try {
     const { search } = req.params; // Obtener el término de búsqueda desde los parámetros de la URL
 
+    // Verificar si la búsqueda está en la caché
+    if (productSearchCache[search]) {
+      return res.status(200).json(productSearchCache[search]);
+    }
+
     let productsRef = db.collection('products');
 
     if (search) {
@@ -117,7 +160,9 @@ export const searchProduct = async (req, res) => {
         .where('nombre', '<=', search + '\uf8ff');
     }
 
-    const productsSnapshot = await productsRef.get();
+    const productsSnapshotPromise = productsRef.get();
+
+    const [productsSnapshot] = await Promise.all([productsSnapshotPromise]);
 
     if (productsSnapshot.empty) {
       return res.status(404).json({ message: 'No se encontraron productos.' });
@@ -129,6 +174,9 @@ export const searchProduct = async (req, res) => {
       cantidad: doc.data().cantidad,
     }));
 
+    // Almacenar el resultado de la búsqueda en la caché
+    productSearchCache[search] = response;
+
     return res.status(200).json(response);
   } catch (error) {
     return res
@@ -136,3 +184,4 @@ export const searchProduct = async (req, res) => {
       .json({ message: 'An unexpected error occurred on the server' });
   }
 };
+

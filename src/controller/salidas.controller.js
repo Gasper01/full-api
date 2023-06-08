@@ -109,29 +109,59 @@ export const aprobarSalidas = async (req, res) => {
   }
 };
 
+const SalidasNoaprovadascache = {}; 
+
 export const getSalidasNoaprovadas = async (req, res) => {
   try {
+    // Verificar si los resultados están en la caché
+    if (SalidasNoaprovadascache.salidasNoAprobadas) {
+      return res.status(200).json(SalidasNoaprovadascache.salidasNoAprobadas);
+    }
+
     const Salidas = await db
       .collection('Salidas')
       .where('aprobada', '==', false)
       .get();
+
     const response = await Promise.all(
       Salidas.docs.map(async (doc) => {
         const userId = doc.data().userId;
-        const userSnapshot = await db.collection('users').doc(userId).get();
-        const userData = {
-          username: userSnapshot.data().username,
-          email: userSnapshot.data().email,
-          imgUrl: userSnapshot.data().imgUrl,
-        };
+
+        // Verificar si los datos del usuario están en la caché
+        let userData;
+        if (SalidasNoaprovadascache.users && SalidasNoaprovadascache.users[userId]) {
+          userData = SalidasNoaprovadascache.users[userId];
+        } else {
+          // Consultar los datos del usuario en Firebase
+          const [userSnapshot] = await Promise.all([
+            db.collection('users').doc(userId).get()
+          ]);
+
+          userData = {
+            username: userSnapshot.data().username,
+            email: userSnapshot.data().email,
+            imgUrl: userSnapshot.data().imgUrl,
+          };
+
+          // Almacenar los datos del usuario en la caché
+          if (!SalidasNoaprovadascache.users) {
+            SalidasNoaprovadascache.users = {};
+          }
+          SalidasNoaprovadascache.users[userId] = userData;
+        }
+
         return {
           id: doc.id,
           fecha: doc.data().fecha,
           destino: doc.data().destino,
-          user: userData, // Agrega los datos del usuario al objeto de respuesta
+          user: userData, // Agregar los datos del usuario al objeto de respuesta
         };
       })
     );
+
+    // Almacenar los resultados en la caché
+    SalidasNoaprovadascache.salidasNoAprobadas = response;
+
     return res.status(200).json(response);
   } catch (error) {
     return res
@@ -140,22 +170,43 @@ export const getSalidasNoaprovadas = async (req, res) => {
   }
 };
 
+
+const SalidasCacheId = {}; 
+
 export const getSalidasById = async (req, res) => {
   const { salidaId } = req.params;
   try {
+    // Verificar si el resultado está en la caché
+    if (SalidasCacheId[salidaId]) {
+      return res.status(200).json(SalidasCacheId[salidaId]);
+    }
+
     const Salidas = db.collection('Salidas').doc(salidaId);
     const doc = await Salidas.get();
 
     if (!doc.exists) {
-      return res.status(403).json('Salidas found with id ');
+      return res.status(403).json(`Salida not found with id ${salidaId}`);
     }
+
+    const userDataPromise = db.collection('users').doc(doc.data().userId).get();
+
+    const [userDataSnapshot] = await Promise.all([userDataPromise]);
+
+    const userData = {
+      username: userDataSnapshot.data().username,
+      email: userDataSnapshot.data().email,
+      imgUrl: userDataSnapshot.data().imgUrl,
+    };
 
     const response = {
       id: doc.id,
       fecha: doc.data().fecha,
       destino: doc.data().destino,
-      productos: doc.data().productos,
+      user: userData,
     };
+
+    // Almacenar el resultado en la caché
+    SalidasCacheId[salidaId] = response;
 
     return res.status(200).json(response);
   } catch (error) {
@@ -164,3 +215,4 @@ export const getSalidasById = async (req, res) => {
       .json({ message: 'An unexpected error occurred on the server' });
   }
 };
+

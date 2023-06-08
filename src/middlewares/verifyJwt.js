@@ -2,22 +2,36 @@ import Jwt from 'jsonwebtoken';
 import db from '../db/config.connection';
 import dotenv from 'dotenv';
 dotenv.config();
+const tokenCache = {};
 
 export const verifyToken = async (req, res, next) => {
   try {
     const token = req.headers['x-access-token'];
 
-    if (!token) return res.status(403).json({ message: 'No token provided' });
+    if (!token) {
+      return res.status(403).json({ message: 'No token provided' });
+    }
+
+    // Comprobar si el token existe en la caché
+    if (tokenCache[token]) {
+      req.userId = tokenCache[token];
+      return next();
+    }
 
     const decoded = Jwt.verify(token, process.env.SECREJWTJSON);
     req.userId = decoded.id;
-    const user = await db.collection('users').doc(req.userId).get();
 
-    if (user.exists) {
+    const userSnapshot = await db.collection('users').doc(req.userId).get();
+
+    if (userSnapshot.exists) {
+      // Almacenar el token en la caché
+      tokenCache[token] = req.userId;
       return next();
+    } else {
+      return res.status(403).json({ message: 'User not verified' });
     }
-    return res.status(403).json({ message: 'Not user Verify' });
   } catch (error) {
-    return res.status(500).json({ message: 'Anauthorized' });
+    return res.status(500).json({ message: 'Unauthorized' });
   }
 };
+

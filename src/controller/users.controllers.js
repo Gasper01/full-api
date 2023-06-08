@@ -1,31 +1,66 @@
 import db from '../db/config.connection';
+
+
+const userCache = {};
 export const getUser = async (req, res) => {
   try {
-    const users = await db.collection('users').get();
-    const data = users.docs.map((doc) => ({
-      id: doc.id,
-      username: doc.data().username,
-      email: doc.data().email,
-      imgUrl: doc.data().imgUrl,
-      rol: doc.data().rol,
-    }));
-    return res.status(200).json(data);
+    // Verificar si los datos de usuario están en la caché
+    if (Object.keys(userCache).length !== 0) {
+      return res.status(200).json(Object.values(userCache));
+    }
+
+    const usersSnapshot = await db.collection('users').get();
+
+    const userDataPromises = usersSnapshot.docs.map(async (doc) => {
+      const userId = doc.id;
+      const userCacheData = userCache[userId];
+
+      // Verificar si los datos de usuario están en la caché
+      if (userCacheData) {
+        return userCacheData;
+      }
+
+      const userData = {
+        id: userId,
+        username: doc.data().username,
+        email: doc.data().email,
+        imgUrl: doc.data().imgUrl,
+        rol: doc.data().rol,
+      };
+
+      // Almacenar los datos de usuario en la caché
+      userCache[userId] = userData;
+
+      return userData;
+    });
+
+    const userData = await Promise.all(userDataPromises);
+
+    return res.status(200).json(userData);
   } catch (error) {
     return res
       .status(500)
       .json({ message: 'An unexpected error occurred on the server' });
   }
 };
+
 export const getUserById = async (req, res) => {
   try {
-    const users = db.collection('users').doc(req.userId);
+    const userId = req.userId;
+
+    // Verificar si los datos de usuario están en la caché
+    if (userCache[userId]) {
+      return res.status(200).json(userCache[userId]);
+    }
+
+    const users = db.collection('users').doc(userId);
     const userDoc = await users.get();
 
     if (!userDoc.exists) {
-      return res.status(403).json('User found with id ');
+      return res.status(403).json({ message: 'User not found with id' });
     }
 
-    const response = {
+    const userData = {
       id: userDoc.id,
       imgUrl: userDoc.data().imgUrl,
       username: userDoc.data().username,
@@ -33,13 +68,16 @@ export const getUserById = async (req, res) => {
       rol: userDoc.data().rol,
     };
 
-    return res.status(200).json(response);
+    // Almacenar los datos de usuario en la caché
+    userCache[userId] = userData;
+
+    return res.status(200).json(userData);
   } catch (error) {
     return res
       .status(500)
       .json({ message: 'An unexpected error occurred on the server' });
   }
-};
+}
 
 export const deleteUserById = async (req, res) => {
   try {
@@ -51,6 +89,7 @@ export const deleteUserById = async (req, res) => {
     }
 
     await users.delete();
+    userCache = {};
     return res.status(200).json('ok');
   } catch (error) {
     return res
