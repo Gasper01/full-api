@@ -1,19 +1,19 @@
-import Jwt from 'jsonwebtoken';
-import db from '../db/config.connection';
-import userModel from '../models/user.model';
-import dotenv from 'dotenv';
+import Jwt from "jsonwebtoken";
+import db from "../db/config.connection";
+import userModel from "../models/user.model";
+import dotenv from "dotenv";
 dotenv.config();
 
 export const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ message: 'Missing email or password' });
+      return res.status(400).json({ message: "Missing email or password" });
     }
 
     const userExistsPromise = db
-      .collection('users')
-      .where('email', '==', email)
+      .collection("users")
+      .where("email", "==", email)
       .limit(1)
       .get();
 
@@ -21,7 +21,7 @@ export const signIn = async (req, res) => {
     const user = userExistsSnapshot.docs[0];
 
     if (!user) {
-      return res.status(400).json({ message: 'User does not exist' });
+      return res.status(400).json({ message: "User does not exist" });
     }
 
     const passwordMatch = await userModel.comparePassword(
@@ -29,18 +29,18 @@ export const signIn = async (req, res) => {
       user.data().password
     );
     if (!passwordMatch) {
-      return res.status(400).json({ message: 'Incorrect password' });
+      return res.status(400).json({ message: "Incorrect password" });
     }
 
-    const token = Jwt.sign({ id: user.id }, process.env.SECRET_JWT_JSON, {
-      expiresIn: '5h',
+    const token = Jwt.sign({ id: user.id }, process.env.SECREJWTJSON, {
+      expiresIn: "5h",
     });
 
-    return res.status(200).json({ token });
+    return res.status(200).json(token);
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
 
@@ -48,18 +48,18 @@ export const signUp = async (req, res) => {
   const { imgUrl, username, email, password, rol } = req.body;
   try {
     if (!imgUrl || !username || !email || !password || !rol) {
-      return res.status(400).json({ message: 'Missing required fields' });
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
     const userExistsPromise = db
-      .collection('users')
-      .where('email', '==', email)
+      .collection("users")
+      .where("email", "==", email)
       .limit(1)
       .get();
 
     const [userExistsSnapshot] = await Promise.all([userExistsPromise]);
     if (!userExistsSnapshot.empty) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: "User already exists" });
     }
 
     const hashedPassword = userModel.hashPassword(password);
@@ -72,12 +72,12 @@ export const signUp = async (req, res) => {
       rol,
     };
 
-    await db.collection('users').add(newUser);
+    await db.collection("users").add(newUser);
 
-    return res.status(200).json({ message: 'User created successfully' });
+    return res.status(200).json({ message: "User created successfully" });
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };

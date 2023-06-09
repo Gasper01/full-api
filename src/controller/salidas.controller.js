@@ -1,8 +1,7 @@
-import db from '../db/config.connection';
+import db from "../db/config.connection";
 
 export const createSalidas = async (req, res) => {
   const { fecha, destino, motorista, userId, productos } = req.body;
-
   try {
     const newSalidas = {
       fecha,
@@ -16,7 +15,7 @@ export const createSalidas = async (req, res) => {
     for (const producto of productos) {
       const { id, nombre, cantidadAdd, sistema } = producto;
 
-      const productRef = db.collection('products').doc(id);
+      const productRef = db.collection("products").doc(id);
       const productSnapshot = await productRef.get();
 
       if (productSnapshot.exists) {
@@ -34,10 +33,10 @@ export const createSalidas = async (req, res) => {
         if (sumacantidad > productData.cantidad) {
           return res.status(400).json({
             message:
-              'Supera la cantidad existente  ' +
-              '  Nombre: ' +
+              "Supera la cantidad existente  " +
+              "  Nombre: " +
               productData.nombre +
-              '  Existente: ' +
+              "  Existente: " +
               productData.cantidad,
           });
         }
@@ -50,16 +49,16 @@ export const createSalidas = async (req, res) => {
           sistema,
         });
       } else {
-        return res.status(404).json('Producto no encontrado');
+        return res.status(404).json("Producto no encontrado");
       }
     }
 
-    await db.collection('Salidas').add(newSalidas);
-    return res.status(200).json('ok');
+    await db.collection("Salidas").add(newSalidas);
+    return res.status(200).json("ok");
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'Se produjo un error inesperado en el servidor' });
+      .json({ message: "Se produjo un error inesperado en el servidor" });
   }
 };
 
@@ -67,11 +66,11 @@ export const aprobarSalidas = async (req, res) => {
   const { salidaId } = req.params;
 
   try {
-    const salidaRef = db.collection('Salidas').doc(salidaId);
+    const salidaRef = db.collection("Salidas").doc(salidaId);
     const salidaSnapshot = await salidaRef.get();
 
     if (!salidaSnapshot.exists) {
-      return res.status(404).json('Salida no encontrada');
+      return res.status(404).json("Salida no encontrada");
     }
 
     const salidaData = salidaSnapshot.data();
@@ -81,7 +80,7 @@ export const aprobarSalidas = async (req, res) => {
     for (const producto of productos) {
       const { id, cantidadAdd } = producto;
 
-      const productRef = db.collection('products').doc(id);
+      const productRef = db.collection("products").doc(id);
       const productSnapshot = await productRef.get();
 
       if (productSnapshot.exists) {
@@ -92,7 +91,7 @@ export const aprobarSalidas = async (req, res) => {
           cantidad: nuevaCantidad,
         });
       } else {
-        return res.status(404).json('Producto no encontrado');
+        return res.status(404).json("Producto no encontrado");
       }
     }
 
@@ -101,15 +100,15 @@ export const aprobarSalidas = async (req, res) => {
       aprobada: true,
     });
 
-    return res.status(200).json('Salida aprobada y cantidades actualizadas');
+    return res.status(200).json("Salida aprobada y cantidades actualizadas");
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'Se produjo un error inesperado en el servidor' });
+      .json({ message: "Se produjo un error inesperado en el servidor" });
   }
 };
 
-const SalidasNoaprovadascache = {}; 
+const SalidasNoaprovadascache = {};
 
 export const getSalidasNoaprovadas = async (req, res) => {
   try {
@@ -119,8 +118,8 @@ export const getSalidasNoaprovadas = async (req, res) => {
     }
 
     const Salidas = await db
-      .collection('Salidas')
-      .where('aprobada', '==', false)
+      .collection("Salidas")
+      .where("aprobada", "==", false)
       .get();
 
     const response = await Promise.all(
@@ -129,12 +128,15 @@ export const getSalidasNoaprovadas = async (req, res) => {
 
         // Verificar si los datos del usuario están en la caché
         let userData;
-        if (SalidasNoaprovadascache.users && SalidasNoaprovadascache.users[userId]) {
+        if (
+          SalidasNoaprovadascache.users &&
+          SalidasNoaprovadascache.users[userId]
+        ) {
           userData = SalidasNoaprovadascache.users[userId];
         } else {
           // Consultar los datos del usuario en Firebase
           const [userSnapshot] = await Promise.all([
-            db.collection('users').doc(userId).get()
+            db.collection("users").doc(userId).get(),
           ]);
 
           userData = {
@@ -166,12 +168,11 @@ export const getSalidasNoaprovadas = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'Se produjo un error inesperado en el servidor' });
+      .json({ message: "Se produjo un error inesperado en el servidor" });
   }
 };
 
-
-const SalidasCacheId = {}; 
+const SalidasCacheId = {};
 
 export const getSalidasById = async (req, res) => {
   const { salidaId } = req.params;
@@ -181,14 +182,14 @@ export const getSalidasById = async (req, res) => {
       return res.status(200).json(SalidasCacheId[salidaId]);
     }
 
-    const Salidas = db.collection('Salidas').doc(salidaId);
+    const Salidas = db.collection("Salidas").doc(salidaId);
     const doc = await Salidas.get();
 
     if (!doc.exists) {
       return res.status(403).json(`Salida not found with id ${salidaId}`);
     }
 
-    const userDataPromise = db.collection('users').doc(doc.data().userId).get();
+    const userDataPromise = db.collection("users").doc(doc.data().userId).get();
 
     const [userDataSnapshot] = await Promise.all([userDataPromise]);
 
@@ -203,6 +204,7 @@ export const getSalidasById = async (req, res) => {
       fecha: doc.data().fecha,
       destino: doc.data().destino,
       user: userData,
+      productos: doc.data().productos,
     };
 
     // Almacenar el resultado en la caché
@@ -212,7 +214,6 @@ export const getSalidasById = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
-
