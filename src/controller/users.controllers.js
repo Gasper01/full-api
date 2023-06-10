@@ -1,7 +1,6 @@
-import db from '../db/config.connection';
+import db from "../db/config.connection";
 
-
-const userCache = {};
+let userCache = {};
 export const getUser = async (req, res) => {
   try {
     // Verificar si los datos de usuario están en la caché
@@ -9,7 +8,7 @@ export const getUser = async (req, res) => {
       return res.status(200).json(Object.values(userCache));
     }
 
-    const usersSnapshot = await db.collection('users').get();
+    const usersSnapshot = await db.collection("users").get();
 
     const userDataPromises = usersSnapshot.docs.map(async (doc) => {
       const userId = doc.id;
@@ -40,7 +39,7 @@ export const getUser = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
 
@@ -53,11 +52,11 @@ export const getUserById = async (req, res) => {
       return res.status(200).json(userCache[userId]);
     }
 
-    const users = db.collection('users').doc(userId);
+    const users = db.collection("users").doc(userId);
     const userDoc = await users.get();
 
     if (!userDoc.exists) {
-      return res.status(403).json({ message: 'User not found with id' });
+      return res.status(403).json({ message: "User not found with id" });
     }
 
     const userData = {
@@ -75,25 +74,25 @@ export const getUserById = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
-}
+};
 
 export const deleteUserById = async (req, res) => {
   try {
-    const users = db.collection('users').doc(req.params.userId);
+    const users = db.collection("users").doc(req.params.userId);
     const userId = await users.get();
 
     if (!userId.exists) {
-      return res.status(404).json('No product found with id');
+      return res.status(404).json("No product found with id");
     }
 
     await users.delete();
     userCache = {};
-    return res.status(200).json('ok');
+    return res.status(200).json("ok");
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };

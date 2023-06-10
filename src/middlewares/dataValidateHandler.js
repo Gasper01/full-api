@@ -3,7 +3,7 @@ export default function dataValidateHandler(dataModel) {
     try {
       const { error } = dataModel.validate(req.body);
       if (error) {
-        return res.status(400).json({ message: 'Datos inválidos' });
+        return res.status(400).json({ message: "Datos inválidos" });
       }
       next();
     } catch (error) {

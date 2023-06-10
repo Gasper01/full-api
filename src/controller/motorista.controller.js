@@ -1,4 +1,7 @@
-import db from '../db/config.connection';
+import db from "../db/config.connection";
+
+// Objeto para almacenar en caché los resultados de las consultas
+let motoristasCache = {};
 
 export const createMotorista = async (req, res) => {
   const { motoristaName, placa, cars } = req.body;
@@ -6,8 +9,8 @@ export const createMotorista = async (req, res) => {
   try {
     // Verificar si el motorista ya existe
     const motoristaSnapshotPromise = db
-      .collection('motoristas')
-      .where('motoristaName', '==', motoristaName)
+      .collection("motoristas")
+      .where("motoristaName", "==", motoristaName)
       .limit(1)
       .get();
 
@@ -15,7 +18,7 @@ export const createMotorista = async (req, res) => {
 
     if (!motoristaSnapshot.empty) {
       // Si el motorista ya existe, devolver un error
-      return res.status(400).json({ message: 'Motorista already exists' });
+      return res.status(400).json({ message: "Motorista already exists" });
     }
 
     const newMotorista = {
@@ -24,18 +27,15 @@ export const createMotorista = async (req, res) => {
       cars,
     };
 
-    await db.collection('motoristas').add(newMotorista);
-
-    return res.status(200).json('ok');
+    await db.collection("motoristas").add(newMotorista);
+    motoristasCache = {};
+    return res.status(200).json("ok");
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
-
-// Objeto para almacenar en caché los resultados de las consultas
-const motoristasCache = {};
 
 export const getMotorista = async (req, res) => {
   try {
@@ -44,7 +44,7 @@ export const getMotorista = async (req, res) => {
       return res.status(200).json(motoristasCache.data);
     }
 
-    const motoristasSnapshotPromise = db.collection('motoristas').get();
+    const motoristasSnapshotPromise = db.collection("motoristas").get();
 
     const [motoristasSnapshot] = await Promise.all([motoristasSnapshotPromise]);
 
@@ -60,7 +60,6 @@ export const getMotorista = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
-

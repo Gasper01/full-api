@@ -1,7 +1,6 @@
-import db from '../db/config.connection';
+import db from "../db/config.connection";
 
 let cachedDestinations = null;
-
 let destinationsCache = {};
 let locationCache = {};
 
@@ -10,12 +9,12 @@ export const createDestinations = async (req, res) => {
 
   try {
     if (!destinationName) {
-      return res.status(400).json({ message: 'Missing destination name' });
+      return res.status(400).json({ message: "Missing destination name" });
     }
 
     const destinationNameExistsPromise = db
-      .collection('destinations')
-      .where('destinationName', '==', destinationName)
+      .collection("destinations")
+      .where("destinationName", "==", destinationName)
       .limit(1)
       .get();
 
@@ -23,20 +22,21 @@ export const createDestinations = async (req, res) => {
       destinationNameExistsPromise,
     ]);
     if (!destinationNameExistsSnapshot.empty) {
-      return res.status(400).json({ message: 'Destination already exists' });
+      return res.status(400).json({ message: "Destination already exists" });
     }
 
     const newDestination = {
       destinationName,
     };
 
-    await db.collection('destinations').add(newDestination);
+    await db.collection("destinations").add(newDestination);
     cachedDestinations = null;
-    return res.status(200).json('ok');
+    destinationsCache = {};
+    return res.status(200).json("ok");
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
 
@@ -46,7 +46,7 @@ export const getDestinations = async (req, res) => {
       // Si los destinos están en la caché, devolver la respuesta de la caché
       return res.status(200).json(cachedDestinations);
     }
-    const destinationsPromise = db.collection('destinations').get();
+    const destinationsPromise = db.collection("destinations").get();
 
     const [destinationsSnapshot] = await Promise.all([destinationsPromise]);
 
@@ -62,7 +62,7 @@ export const getDestinations = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
 
@@ -81,8 +81,8 @@ export const getLocationByDestination = async (req, res) => {
     }
 
     const destinationSnapshotPromise = db
-      .collection('destinations')
-      .where('destinationName', '==', destinationName)
+      .collection("destinations")
+      .where("destinationName", "==", destinationName)
       .get();
 
     const [destinationSnapshot] = await Promise.all([
@@ -94,8 +94,8 @@ export const getLocationByDestination = async (req, res) => {
       const destinationId = destinationDoc.id;
 
       const locationSnapshotPromise = db
-        .collection('locations')
-        .where('idDestination', '==', destinationId)
+        .collection("locations")
+        .where("idDestination", "==", destinationId)
         .get();
 
       const [locationSnapshot] = await Promise.all([locationSnapshotPromise]);
@@ -114,17 +114,17 @@ export const getLocationByDestination = async (req, res) => {
         return res.status(200).json(response);
       } else {
         return res.status(403).json({
-          message: 'No se encontró la ubicación correspondiente al destino.',
+          message: "No se encontró la ubicación correspondiente al destino.",
         });
       }
     } else {
       return res.status(403).json({
-        message: 'No se encontró el destino con el nombre especificado.',
+        message: "No se encontró el destino con el nombre especificado.",
       });
     }
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };

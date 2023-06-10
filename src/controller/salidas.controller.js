@@ -1,4 +1,6 @@
 import db from "../db/config.connection";
+let SalidasNoaprovadascache = {};
+let SalidasCacheId = {};
 
 export const createSalidas = async (req, res) => {
   const { fecha, destino, motorista, userId, productos } = req.body;
@@ -54,8 +56,11 @@ export const createSalidas = async (req, res) => {
     }
 
     await db.collection("Salidas").add(newSalidas);
+    SalidasNoaprovadascache = {};
+
     return res.status(200).json("ok");
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: "Se produjo un error inesperado en el servidor" });
@@ -107,8 +112,6 @@ export const aprobarSalidas = async (req, res) => {
       .json({ message: "Se produjo un error inesperado en el servidor" });
   }
 };
-
-const SalidasNoaprovadascache = {};
 
 export const getSalidasNoaprovadas = async (req, res) => {
   try {
@@ -171,8 +174,6 @@ export const getSalidasNoaprovadas = async (req, res) => {
       .json({ message: "Se produjo un error inesperado en el servidor" });
   }
 };
-
-const SalidasCacheId = {};
 
 export const getSalidasById = async (req, res) => {
   const { salidaId } = req.params;
