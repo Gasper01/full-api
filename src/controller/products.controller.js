@@ -1,24 +1,22 @@
-import db from '../db/config.connection';
+import db from "../db/config.connection";
 
 // Objeto para almacenar en caché los resultados de las consultas
-
-const productsCache = {};
-
-const productSearchCache = {};
+let productsCache = {};
+let productSearchCache = {};
 
 export const createProduct = async (req, res) => {
   const { nombre, cantidad, codigo, unidad } = req.body;
 
   try {
     const productcodigoExists = await db
-      .collection('products')
-      .where('codigo', '==', codigo)
+      .collection("products")
+      .where("codigo", "==", codigo)
       .limit(1)
       .get();
 
     if (!productcodigoExists.empty) {
       // Si el usuario ya existe, devolver un error
-      return res.status(400).json({ message: 'product codigo already exists' });
+      return res.status(400).json({ message: "product codigo already exists" });
     }
     const newProduct = {
       nombre,
@@ -26,18 +24,16 @@ export const createProduct = async (req, res) => {
       codigo,
       unidad,
     };
-    await db.collection('products').add(newProduct);
+    await db.collection("products").add(newProduct);
     productsCache = {};
 
-    return res.status(200).json('ok');
+    return res.status(200).json("ok");
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
-
-
 
 export const getProducts = async (req, res) => {
   try {
@@ -46,7 +42,7 @@ export const getProducts = async (req, res) => {
       return res.status(200).json(productsCache.data);
     }
 
-    const productsSnapshotPromise = db.collection('products').get();
+    const productsSnapshotPromise = db.collection("products").get();
 
     const [productsSnapshot] = await Promise.all([productsSnapshotPromise]);
 
@@ -62,10 +58,9 @@ export const getProducts = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
-
 
 export const getProductsById = async (req, res) => {
   try {
@@ -76,12 +71,12 @@ export const getProductsById = async (req, res) => {
       return res.status(200).json(productsCache[productId]);
     }
 
-    const productsDocPromise = db.collection('products').doc(productId).get();
+    const productsDocPromise = db.collection("products").doc(productId).get();
 
     const [productsDoc] = await Promise.all([productsDocPromise]);
 
     if (!productsDoc.exists) {
-      return res.status(403).json('No product found with id');
+      return res.status(403).json("No product found with id");
     }
 
     const response = {
@@ -96,50 +91,49 @@ export const getProductsById = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
 
-
 export const updateProductById = async (req, res) => {
   try {
-    const products = db.collection('products').doc(req.params.productId);
+    const products = db.collection("products").doc(req.params.productId);
     const productId = await products.get();
 
     if (!productId.exists) {
-      return res.status(404).json('No product found with id');
+      return res.status(404).json("No product found with id");
     }
 
     const nombre = req.body;
 
     await products.update(nombre);
-   productsCache = {};
-   productSearchCache = {};
-    return res.status(200).json('ok');
+    productsCache = {};
+    productSearchCache = {};
+    return res.status(200).json("ok");
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
 
 export const deleteProductById = async (req, res) => {
   try {
-    const products = db.collection('products').doc(req.params.productId);
+    const products = db.collection("products").doc(req.params.productId);
     const productId = await products.get();
 
     if (!productId.exists) {
-      return res.status(404).json('No product found with id');
+      return res.status(404).json("No product found with id");
     }
 
     await products.delete();
     productsCache = {};
     productSearchCache = {};
-    return res.status(200).json('ok');
+    return res.status(200).json("ok");
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
 
@@ -152,12 +146,12 @@ export const searchProduct = async (req, res) => {
       return res.status(200).json(productSearchCache[search]);
     }
 
-    let productsRef = db.collection('products');
+    let productsRef = db.collection("products");
 
     if (search) {
       productsRef = productsRef
-        .where('nombre', '>=', search)
-        .where('nombre', '<=', search + '\uf8ff');
+        .where("nombre", ">=", search)
+        .where("nombre", "<=", search + "\uf8ff");
     }
 
     const productsSnapshotPromise = productsRef.get();
@@ -165,7 +159,7 @@ export const searchProduct = async (req, res) => {
     const [productsSnapshot] = await Promise.all([productsSnapshotPromise]);
 
     if (productsSnapshot.empty) {
-      return res.status(404).json({ message: 'No se encontraron productos.' });
+      return res.status(404).json({ message: "No se encontraron productos." });
     }
 
     const response = productsSnapshot.docs.map((doc) => ({
@@ -181,7 +175,6 @@ export const searchProduct = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: 'An unexpected error occurred on the server' });
+      .json({ message: "An unexpected error occurred on the server" });
   }
 };
-
