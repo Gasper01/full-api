@@ -2,7 +2,7 @@ import db from "../db/config.connection";
 let SalidasNoaprovadascache = {};
 let SalidasCacheId = {};
 let SalidasByIdUser = {};
-let userData = {};
+
 export const createSalidas = async (req, res) => {
   const { fecha, destino, motorista, userId, productos } = req.body;
   try {
@@ -127,7 +127,6 @@ export const aprobarSalidas = async (req, res) => {
     });
     SalidasNoaprovadascache = {};
     SalidasByIdUser = {};
-    userData = {};
 
     return res
       .status(200)
@@ -155,7 +154,7 @@ export const getSalidasNoaprovadas = async (req, res) => {
         const userId = doc.data().userId;
 
         // Verificar si los datos del usuario están en la caché
-
+        let userData;
         if (
           SalidasNoaprovadascache.users &&
           SalidasNoaprovadascache.users[userId]
@@ -194,6 +193,7 @@ export const getSalidasNoaprovadas = async (req, res) => {
 
     return res.status(200).json(response);
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: "Se produjo un error inesperado en el servidor" });
@@ -371,7 +371,7 @@ export const DeleteSalidasById = async (req, res) => {
     SalidasByIdUser = {};
     SalidasCacheId = {};
     SalidasNoaprovadascache = {};
-    userData = {};
+
     return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
