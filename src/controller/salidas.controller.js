@@ -1,7 +1,4 @@
 import db from "../db/config.connection";
-import NodeCache from "node-cache";
-
-const cache = new NodeCache();
 
 export const createSalidas = async (req, res) => {
   const { fecha, destino, motorista, userId, productos } = req.body;
@@ -58,10 +55,9 @@ export const createSalidas = async (req, res) => {
     }
 
     await db.collection("Salidas").add(newSalidas);
-    cache.flushAll();
+
     return res.status(200).json("ok");
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json({ message: "Se produjo un error inesperado en el servidor" });
@@ -124,7 +120,7 @@ export const aprobarSalidas = async (req, res) => {
     await salidaRef.update({
       aprobada: true,
     });
-    cache.flushAll();
+
     return res
       .status(200)
       .json({ message: "Salida aprobada y cantidades actualizadas" });
@@ -136,47 +132,37 @@ export const aprobarSalidas = async (req, res) => {
 };
 export const getSalidasNoaprovadas = async (req, res) => {
   try {
-    // Intenta obtener los resultados de la caché
-    const cacheKey = "salidasNoaprovadas";
-    let response = cache.get(cacheKey);
+    const Salidas = await db
+      .collection("Salidas")
+      .where("aprobada", "==", false)
+      .get();
 
-    if (!response) {
-      // Si los resultados no están en la caché, realiza la consulta a la base de datos
-      const Salidas = await db
-        .collection("Salidas")
-        .where("aprobada", "==", false)
-        .get();
+    // Procesa los resultados y agrega los datos del usuario
+    const response = await Promise.all(
+      Salidas.docs.map(async (doc) => {
+        const userId = doc.data().userId;
 
-      // Procesa los resultados y agrega los datos del usuario
-      response = await Promise.all(
-        Salidas.docs.map(async (doc) => {
-          const userId = doc.data().userId;
+        {
+          // Consultar los datos del usuario en Firebase
+          const [userSnapshot] = await Promise.all([
+            db.collection("users").doc(userId).get(),
+          ]);
 
-          {
-            // Consultar los datos del usuario en Firebase
-            const [userSnapshot] = await Promise.all([
-              db.collection("users").doc(userId).get(),
-            ]);
+          const userData = {
+            username: userSnapshot.data().username,
+            email: userSnapshot.data().email,
+            imgUrl: userSnapshot.data().imgUrl,
+          };
 
-            const userData = {
-              username: userSnapshot.data().username,
-              email: userSnapshot.data().email,
-              imgUrl: userSnapshot.data().imgUrl,
-            };
-
-            return {
-              id: doc.id,
-              fecha: doc.data().fecha,
-              destino: doc.data().destino,
-              user: userData, // Agregar los datos del usuario al objeto de respuesta
-            };
-          }
-        })
-      );
-
-      // Almacena los resultados en la caché con un tiempo de vida de 1 hora (3600 segundos)
-      cache.set(cacheKey, response, 3600);
-    }
+          return {
+            id: doc.id,
+            fecha: doc.data().fecha,
+            destino: doc.data().destino,
+            user: userData, // Agregar los datos del usuario al objeto de respuesta
+          };
+        }
+      })
+    );
 
     return res.status(200).json(response);
   } catch (error) {
@@ -188,47 +174,34 @@ export const getSalidasNoaprovadas = async (req, res) => {
 export const getSalidasById = async (req, res) => {
   const { salidaId } = req.params;
   try {
-    // Intenta obtener los resultados de la caché
-    const cacheKey = `salidaById_${salidaId}`;
-    let response = cache.get(cacheKey);
+    const Salidas = db.collection("Salidas").doc(salidaId);
+    const doc = await Salidas.get();
 
-    if (!response) {
-      // Si los resultados no están en la caché, realiza la consulta a la base de datos
-      const Salidas = db.collection("Salidas").doc(salidaId);
-      const doc = await Salidas.get();
-
-      if (!doc.exists) {
-        return res
-          .status(403)
-          .json({ message: `Salida not found with id ${salidaId}` });
-      }
-
-      const userDataPromise = db
-        .collection("users")
-        .doc(doc.data().userId)
-        .get();
-
-      const [userDataSnapshot] = await Promise.all([userDataPromise]);
-
-      const userData = {
-        username: userDataSnapshot.data().username,
-        email: userDataSnapshot.data().email,
-        imgUrl: userDataSnapshot.data().imgUrl,
-      };
-
-      response = {
-        id: doc.id,
-        aprobada: doc.data().aprobada,
-        destino: doc.data().destino,
-        fecha: doc.data().fecha,
-        motorista: doc.data().motorista,
-        user: userData,
-        productos: doc.data().productos,
-      };
-
-      // Almacena los resultados en la caché con un tiempo de vida de 1 hora (3600 segundos)
-      cache.set(cacheKey, response, 3600);
+    if (!doc.exists) {
+      return res
+        .status(403)
+        .json({ message: `Salida not found with id ${salidaId}` });
     }
+
+    const userDataPromise = db.collection("users").doc(doc.data().userId).get();
+
+    const [userDataSnapshot] = await Promise.all([userDataPromise]);
+
+    const userData = {
+      username: userDataSnapshot.data().username,
+      email: userDataSnapshot.data().email,
+      imgUrl: userDataSnapshot.data().imgUrl,
+    };
+
+    const response = {
+      id: doc.id,
+      aprobada: doc.data().aprobada,
+      destino: doc.data().destino,
+      fecha: doc.data().fecha,
+      motorista: doc.data().motorista,
+      user: userData,
+      productos: doc.data().productos,
+    };
 
     return res.status(200).json(response);
   } catch (error) {
@@ -243,34 +216,25 @@ export const getSalidasByIdUser = async (req, res) => {
   let limit = 10;
 
   try {
-    // Intenta obtener los resultados de la caché
-    const cacheKey = `salidasByIdUser_${Iduser}_${page}`;
-    let response = cache.get(cacheKey);
+    const Salidas = db.collection("Salidas");
+    let query = Salidas.where("userId", "==", Iduser);
 
-    if (!response) {
-      const Salidas = db.collection("Salidas");
-      let query = Salidas.where("userId", "==", Iduser);
+    const snapshot = await query.get();
+    const salidas = [];
 
-      const snapshot = await query.get();
-      const salidas = [];
+    snapshot.forEach((doc) => {
+      salidas.push({ id: doc.id, ...doc.data() });
+    });
 
-      snapshot.forEach((doc) => {
-        salidas.push({ id: doc.id, ...doc.data() });
-      });
+    // Ordenar las salidas por fecha ascendente
+    salidas.sort((a, b) => b.fecha.localeCompare(a.fecha));
 
-      // Ordenar las salidas por fecha ascendente
-      salidas.sort((a, b) => b.fecha.localeCompare(a.fecha));
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedSalidas = salidas.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(salidas.length / limit);
 
-      const startIndex = (page - 1) * limit;
-      const endIndex = page * limit;
-      const paginatedSalidas = salidas.slice(startIndex, endIndex);
-      const totalPages = Math.ceil(salidas.length / limit);
-
-      response = { salidas: paginatedSalidas, totalPages };
-
-      // Almacena los resultados en la caché con un tiempo de vida de 1 hora (3600 segundos)
-      cache.set(cacheKey, response, 3600);
-    }
+    const response = { salidas: paginatedSalidas, totalPages };
 
     res.status(200).json(response);
   } catch (error) {
@@ -339,7 +303,7 @@ export const updateSalidasById = async (req, res) => {
 
     updataSalidas.productos = updatedProductos;
     await salidaRef.update(updataSalidas);
-    cache.flushAll();
+
     return res
       .status(200)
       .json({ message: "Salida actualizada correctamente" });
@@ -357,7 +321,7 @@ export const DeleteSalidasById = async (req, res) => {
     }
 
     await Salidas.delete();
-    cache.flushAll();
+
     return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
