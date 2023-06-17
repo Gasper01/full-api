@@ -60,6 +60,7 @@ export const createSalidas = async (req, res) => {
     await db.collection("Salidas").add(newSalidas);
     SalidasNoaprovadascache = {};
     SalidasByIdUser = {};
+    SalidasCacheId = {};
     return res.status(200).json("ok");
   } catch (error) {
     console.log(error);
@@ -127,7 +128,7 @@ export const aprobarSalidas = async (req, res) => {
     });
     SalidasNoaprovadascache = {};
     SalidasByIdUser = {};
-
+    SalidasCacheId = {};
     return res
       .status(200)
       .json({ message: "Salida aprobada y cantidades actualizadas" });
