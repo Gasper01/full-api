@@ -1,6 +1,5 @@
 import db from "../db/config.connection";
-
-let userCache = {};
+import { userCache, clearCacheUser } from "../cache/cache";
 export const getUser = async (req, res) => {
   try {
     // Verificar si los datos de usuario están en la caché
@@ -79,6 +78,7 @@ export const getUserById = async (req, res) => {
 };
 
 export const deleteUserById = async (req, res) => {
+  clearCacheUser();
   try {
     const users = db.collection("users").doc(req.params.userId);
     const userId = await users.get();
@@ -88,7 +88,7 @@ export const deleteUserById = async (req, res) => {
     }
 
     await users.delete();
-    userCache = {};
+
     return res.status(200).json("ok");
   } catch (error) {
     return res
