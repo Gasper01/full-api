@@ -1,22 +1,10 @@
 import db from "../db/config.connection";
-import { userCache, clearCacheUser } from "../cache/cache";
 export const getUser = async (req, res) => {
   try {
-    // Verificar si los datos de usuario están en la caché
-    if (Object.keys(userCache).length !== 0) {
-      return res.status(200).json(Object.values(userCache));
-    }
-
     const usersSnapshot = await db.collection("users").get();
-
     const userDataPromises = usersSnapshot.docs.map(async (doc) => {
       const userId = doc.id;
       const userCacheData = userCache[userId];
-
-      // Verificar si los datos de usuario están en la caché
-      if (userCacheData) {
-        return userCacheData;
-      }
 
       const userData = {
         id: userId,
@@ -25,9 +13,6 @@ export const getUser = async (req, res) => {
         imgUrl: doc.data().imgUrl,
         rol: doc.data().rol,
       };
-
-      // Almacenar los datos de usuario en la caché
-      userCache[userId] = userData;
 
       return userData;
     });
@@ -46,11 +31,6 @@ export const getUserById = async (req, res) => {
   try {
     const userId = req.userId;
 
-    // Verificar si los datos de usuario están en la caché
-    if (userCache[userId]) {
-      return res.status(200).json(userCache[userId]);
-    }
-
     const users = db.collection("users").doc(userId);
     const userDoc = await users.get();
 
@@ -66,9 +46,6 @@ export const getUserById = async (req, res) => {
       rol: userDoc.data().rol,
     };
 
-    // Almacenar los datos de usuario en la caché
-    userCache[userId] = userData;
-
     return res.status(200).json(userData);
   } catch (error) {
     return res
@@ -78,7 +55,6 @@ export const getUserById = async (req, res) => {
 };
 
 export const deleteUserById = async (req, res) => {
-  clearCacheUser();
   try {
     const users = db.collection("users").doc(req.params.userId);
     const userId = await users.get();
