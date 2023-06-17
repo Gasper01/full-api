@@ -4,6 +4,7 @@ import NodeCache from "node-cache";
 const cache = new NodeCache();
 
 export const createSalidas = async (req, res) => {
+  cache.flushAll();
   const { fecha, destino, motorista, userId, productos } = req.body;
   try {
     const newSalidas = {
@@ -58,7 +59,7 @@ export const createSalidas = async (req, res) => {
     }
 
     await db.collection("Salidas").add(newSalidas);
-    cache.flushAll();
+
     return res.status(200).json("ok");
   } catch (error) {
     return res
@@ -67,6 +68,7 @@ export const createSalidas = async (req, res) => {
   }
 };
 export const aprobarSalidas = async (req, res) => {
+  cache.flushAll();
   const { salidaId } = req.params;
 
   try {
@@ -123,7 +125,7 @@ export const aprobarSalidas = async (req, res) => {
     await salidaRef.update({
       aprobada: true,
     });
-    cache.flushAll();
+
     return res
       .status(200)
       .json({ message: "Salida aprobada y cantidades actualizadas" });
@@ -133,6 +135,96 @@ export const aprobarSalidas = async (req, res) => {
       .json({ message: "Se produjo un error inesperado en el servidor" });
   }
 };
+
+export const updateSalidasById = async (req, res) => {
+  cache.flushAll();
+  const { salidaId } = req.params; // Obtén el ID de la salida de la solicitud
+
+  try {
+    const { productos } = req.body;
+
+    // Obtén la salida existente de la base de datos
+    const salidaRef = db.collection("Salidas").doc(salidaId);
+    const salidaDoc = await salidaRef.get();
+
+    if (!salidaDoc.exists) {
+      return res.status(403).json({ message: "Salida not found with id" });
+    }
+
+    const updataSalidas = salidaDoc.data();
+    const updatedProductos = [];
+
+    // Realiza las comprobaciones para los productos actualizados
+    for (const producto of productos) {
+      const { id, nombre, cantidad, cantidadAdd, sistema } = producto;
+
+      const productRef = db.collection("products").doc(id);
+      const productSnapshot = await productRef.get();
+
+      if (productSnapshot.exists) {
+        const productData = productSnapshot.data();
+
+        // Suma todas las cantidades adicionales para los productos con el mismo ID
+        let sumacantidad = 0;
+        for (const prod of productos) {
+          if (prod.id === id) {
+            sumacantidad += prod.cantidadAdd;
+          }
+        }
+
+        // Comprueba si la suma de las cantidades añadidas supera la cantidad existente
+        if (sumacantidad > productData.cantidad) {
+          return res.status(400).json({
+            message:
+              "Supera la cantidad existente. Nombre: " +
+              productData.nombre +
+              ", Existente: " +
+              productData.cantidad,
+          });
+        }
+
+        // Agrega el producto al array de productos de la salida
+        updatedProductos.push({
+          id,
+          nombre,
+          cantidad,
+          cantidadAdd,
+          sistema,
+        });
+      } else {
+        return res.status(404).json({ message: "Producto no encontrado" });
+      }
+    }
+
+    updataSalidas.productos = updatedProductos;
+    await salidaRef.update(updataSalidas);
+
+    return res
+      .status(200)
+      .json({ message: "Salida actualizada correctamente" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error al actualizar la salida" });
+  }
+};
+export const DeleteSalidasById = async (req, res) => {
+  cache.flushAll();
+  try {
+    const Salidas = db.collection("Salidas").doc(req.params.salidaId);
+    const SalidaId = await Salidas.get();
+
+    if (!SalidaId.exists) {
+      return res.status(404).json({ message: "No Salida found with id" });
+    }
+
+    await Salidas.delete();
+    return res.status(200).json({ message: "ok" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "An unexpected error occurred on the server" });
+  }
+};
+
 export const getSalidasNoaprovadas = async (req, res) => {
   try {
     // Intenta obtener los resultados de la caché
@@ -274,93 +366,5 @@ export const getSalidasByIdUser = async (req, res) => {
     res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ message: "Error getting salidas by User ID" });
-  }
-};
-
-export const updateSalidasById = async (req, res) => {
-  const { salidaId } = req.params; // Obtén el ID de la salida de la solicitud
-
-  try {
-    const { productos } = req.body;
-
-    // Obtén la salida existente de la base de datos
-    const salidaRef = db.collection("Salidas").doc(salidaId);
-    const salidaDoc = await salidaRef.get();
-
-    if (!salidaDoc.exists) {
-      return res.status(403).json({ message: "Salida not found with id" });
-    }
-
-    const updataSalidas = salidaDoc.data();
-    const updatedProductos = [];
-
-    // Realiza las comprobaciones para los productos actualizados
-    for (const producto of productos) {
-      const { id, nombre, cantidad, cantidadAdd, sistema } = producto;
-
-      const productRef = db.collection("products").doc(id);
-      const productSnapshot = await productRef.get();
-
-      if (productSnapshot.exists) {
-        const productData = productSnapshot.data();
-
-        // Suma todas las cantidades adicionales para los productos con el mismo ID
-        let sumacantidad = 0;
-        for (const prod of productos) {
-          if (prod.id === id) {
-            sumacantidad += prod.cantidadAdd;
-          }
-        }
-
-        // Comprueba si la suma de las cantidades añadidas supera la cantidad existente
-        if (sumacantidad > productData.cantidad) {
-          return res.status(400).json({
-            message:
-              "Supera la cantidad existente. Nombre: " +
-              productData.nombre +
-              ", Existente: " +
-              productData.cantidad,
-          });
-        }
-
-        // Agrega el producto al array de productos de la salida
-        updatedProductos.push({
-          id,
-          nombre,
-          cantidad,
-          cantidadAdd,
-          sistema,
-        });
-      } else {
-        return res.status(404).json({ message: "Producto no encontrado" });
-      }
-    }
-
-    updataSalidas.productos = updatedProductos;
-    await salidaRef.update(updataSalidas);
-    cache.flushAll();
-    return res
-      .status(200)
-      .json({ message: "Salida actualizada correctamente" });
-  } catch (error) {
-    return res.status(500).json({ message: "Error al actualizar la salida" });
-  }
-};
-export const DeleteSalidasById = async (req, res) => {
-  try {
-    const Salidas = db.collection("Salidas").doc(req.params.salidaId);
-    const SalidaId = await Salidas.get();
-
-    if (!SalidaId.exists) {
-      return res.status(404).json({ message: "No Salida found with id" });
-    }
-
-    await Salidas.delete();
-    cache.flushAll();
-    return res.status(200).json({ message: "ok" });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "An unexpected error occurred on the server" });
   }
 };
