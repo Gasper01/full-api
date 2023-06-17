@@ -1,9 +1,13 @@
 import db from "../db/config.connection";
+
 let SalidasNoaprovadascache = {};
 let SalidasCacheId = {};
 let SalidasByIdUser = {};
 
 export const createSalidas = async (req, res) => {
+  SalidasNoaprovadascache = {};
+  SalidasByIdUser = {};
+  SalidasCacheId = {};
   const { fecha, destino, motorista, userId, productos } = req.body;
   try {
     const newSalidas = {
@@ -58,9 +62,7 @@ export const createSalidas = async (req, res) => {
     }
 
     await db.collection("Salidas").add(newSalidas);
-    SalidasNoaprovadascache = {};
-    SalidasByIdUser = {};
-    SalidasCacheId = {};
+
     return res.status(200).json("ok");
   } catch (error) {
     console.log(error);
@@ -70,6 +72,9 @@ export const createSalidas = async (req, res) => {
   }
 };
 export const aprobarSalidas = async (req, res) => {
+  SalidasNoaprovadascache = {};
+  SalidasByIdUser = {};
+  SalidasCacheId = {};
   const { salidaId } = req.params;
 
   try {
@@ -126,9 +131,7 @@ export const aprobarSalidas = async (req, res) => {
     await salidaRef.update({
       aprobada: true,
     });
-    SalidasNoaprovadascache = {};
-    SalidasByIdUser = {};
-    SalidasCacheId = {};
+
     return res
       .status(200)
       .json({ message: "Salida aprobada y cantidades actualizadas" });
@@ -290,6 +293,9 @@ export const getSalidasByIdUser = async (req, res) => {
   }
 };
 export const updateSalidasById = async (req, res) => {
+  SalidasByIdUser = {};
+  SalidasCacheId = {};
+  SalidasNoaprovadascache = {};
   const { salidaId } = req.params; // Obtén el ID de la salida de la solicitud
 
   try {
@@ -350,8 +356,7 @@ export const updateSalidasById = async (req, res) => {
 
     updataSalidas.productos = updatedProductos;
     await salidaRef.update(updataSalidas);
-    SalidasByIdUser = {};
-    SalidasCacheId = {};
+
     return res
       .status(200)
       .json({ message: "Salida actualizada correctamente" });
@@ -360,6 +365,9 @@ export const updateSalidasById = async (req, res) => {
   }
 };
 export const DeleteSalidasById = async (req, res) => {
+  SalidasByIdUser = {};
+  SalidasCacheId = {};
+  SalidasNoaprovadascache = {};
   try {
     const Salidas = db.collection("Salidas").doc(req.params.salidaId);
     const SalidaId = await Salidas.get();
@@ -369,9 +377,6 @@ export const DeleteSalidasById = async (req, res) => {
     }
 
     await Salidas.delete();
-    SalidasByIdUser = {};
-    SalidasCacheId = {};
-    SalidasNoaprovadascache = {};
 
     return res.status(200).json({ message: "ok" });
   } catch (error) {
