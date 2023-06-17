@@ -1,13 +1,6 @@
 import db from "../db/config.connection";
 
-let SalidasNoaprovadascache = {};
-let SalidasCacheId = {};
-let SalidasByIdUser = {};
-
 export const createSalidas = async (req, res) => {
-  SalidasNoaprovadascache = {};
-  SalidasByIdUser = {};
-  SalidasCacheId = {};
   const { fecha, destino, motorista, userId, productos } = req.body;
   try {
     const newSalidas = {
@@ -72,9 +65,6 @@ export const createSalidas = async (req, res) => {
   }
 };
 export const aprobarSalidas = async (req, res) => {
-  SalidasNoaprovadascache = {};
-  SalidasByIdUser = {};
-  SalidasCacheId = {};
   const { salidaId } = req.params;
 
   try {
@@ -143,11 +133,6 @@ export const aprobarSalidas = async (req, res) => {
 };
 export const getSalidasNoaprovadas = async (req, res) => {
   try {
-    // Verificar si los resultados están en la caché
-    if (SalidasNoaprovadascache.salidasNoAprobadas) {
-      return res.status(200).json(SalidasNoaprovadascache.salidasNoAprobadas);
-    }
-
     const Salidas = await db
       .collection("Salidas")
       .where("aprobada", "==", false)
@@ -157,43 +142,27 @@ export const getSalidasNoaprovadas = async (req, res) => {
       Salidas.docs.map(async (doc) => {
         const userId = doc.data().userId;
 
-        // Verificar si los datos del usuario están en la caché
-        let userData;
-        if (
-          SalidasNoaprovadascache.users &&
-          SalidasNoaprovadascache.users[userId]
-        ) {
-          userData = SalidasNoaprovadascache.users[userId];
-        } else {
+        {
           // Consultar los datos del usuario en Firebase
           const [userSnapshot] = await Promise.all([
             db.collection("users").doc(userId).get(),
           ]);
 
-          userData = {
+          const userData = {
             username: userSnapshot.data().username,
             email: userSnapshot.data().email,
             imgUrl: userSnapshot.data().imgUrl,
           };
 
-          // Almacenar los datos del usuario en la caché
-          if (!SalidasNoaprovadascache.users) {
-            SalidasNoaprovadascache.users = {};
-          }
-          SalidasNoaprovadascache.users[userId] = userData;
+          return {
+            id: doc.id,
+            fecha: doc.data().fecha,
+            destino: doc.data().destino,
+            user: userData, // Agregar los datos del usuario al objeto de respuesta
+          };
         }
-
-        return {
-          id: doc.id,
-          fecha: doc.data().fecha,
-          destino: doc.data().destino,
-          user: userData, // Agregar los datos del usuario al objeto de respuesta
-        };
       })
     );
-
-    // Almacenar los resultados en la caché
-    SalidasNoaprovadascache.salidasNoAprobadas = response;
 
     return res.status(200).json(response);
   } catch (error) {
@@ -206,11 +175,6 @@ export const getSalidasNoaprovadas = async (req, res) => {
 export const getSalidasById = async (req, res) => {
   const { salidaId } = req.params;
   try {
-    // Verificar si el resultado está en la caché
-    if (SalidasCacheId[salidaId]) {
-      return res.status(200).json(SalidasCacheId[salidaId]);
-    }
-
     const Salidas = db.collection("Salidas").doc(salidaId);
     const doc = await Salidas.get();
 
@@ -238,9 +202,6 @@ export const getSalidasById = async (req, res) => {
       productos: doc.data().productos,
     };
 
-    // Almacenar el resultado en la caché
-    SalidasCacheId[salidaId] = response;
-
     return res.status(200).json(response);
   } catch (error) {
     return res
@@ -251,18 +212,6 @@ export const getSalidasById = async (req, res) => {
 export const getSalidasByIdUser = async (req, res) => {
   const { Iduser, page } = req.params;
   let limit = 10;
-
-  // Verificar si la respuesta está en la caché
-  if (SalidasByIdUser[Iduser]) {
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-    const salidas = SalidasByIdUser[Iduser].slice(startIndex, endIndex);
-
-    const totalPages = Math.ceil(SalidasByIdUser[Iduser].length / limit);
-
-    res.status(200).json({ salidas, totalPages });
-    return;
-  }
 
   const Salidas = db.collection("Salidas");
   let query = Salidas.where("userId", "==", Iduser);
@@ -276,11 +225,7 @@ export const getSalidasByIdUser = async (req, res) => {
     });
 
     // Ordenar las salidas por fecha ascendente
-
     salidas.sort((a, b) => b.fecha.localeCompare(a.fecha));
-
-    // Guardar la respuesta en la caché
-    SalidasByIdUser[Iduser] = salidas;
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -293,9 +238,6 @@ export const getSalidasByIdUser = async (req, res) => {
   }
 };
 export const updateSalidasById = async (req, res) => {
-  SalidasByIdUser = {};
-  SalidasCacheId = {};
-  SalidasNoaprovadascache = {};
   const { salidaId } = req.params; // Obtén el ID de la salida de la solicitud
 
   try {
@@ -365,9 +307,6 @@ export const updateSalidasById = async (req, res) => {
   }
 };
 export const DeleteSalidasById = async (req, res) => {
-  SalidasByIdUser = {};
-  SalidasCacheId = {};
-  SalidasNoaprovadascache = {};
   try {
     const Salidas = db.collection("Salidas").doc(req.params.salidaId);
     const SalidaId = await Salidas.get();
