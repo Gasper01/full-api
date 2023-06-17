@@ -58,7 +58,7 @@ export const createSalidas = async (req, res) => {
     }
 
     await db.collection("Salidas").add(newSalidas);
-    cache.del(["salidasNoaprovadas", "salidasByIdUser", "salidaById"]);
+    cache.flushAll();
     return res.status(200).json("ok");
   } catch (error) {
     console.log(error);
@@ -124,7 +124,7 @@ export const aprobarSalidas = async (req, res) => {
     await salidaRef.update({
       aprobada: true,
     });
-    cache.del(["salidasNoaprovadas", "salidasByIdUser", "salidaById"]);
+    cache.flushAll();
     return res
       .status(200)
       .json({ message: "Salida aprobada y cantidades actualizadas" });
@@ -339,7 +339,7 @@ export const updateSalidasById = async (req, res) => {
 
     updataSalidas.productos = updatedProductos;
     await salidaRef.update(updataSalidas);
-    cache.del(["salidasNoaprovadas", "salidasByIdUser", "salidaById"]);
+    cache.flushAll();
     return res
       .status(200)
       .json({ message: "Salida actualizada correctamente" });
@@ -357,7 +357,7 @@ export const DeleteSalidasById = async (req, res) => {
     }
 
     await Salidas.delete();
-    cache.del(["salidasNoaprovadas", "salidasByIdUser", "salidaById"]);
+    cache.flushAll();
     return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
