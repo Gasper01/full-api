@@ -1,5 +1,5 @@
 import db from "../db/config.connection";
-
+import { productsCache, productSearchCache } from "../cache/cache";
 export const createSalidas = async (req, res) => {
   const { fecha, destino, motorista, userId, productos } = req.body;
   try {
@@ -64,6 +64,8 @@ export const createSalidas = async (req, res) => {
   }
 };
 export const aprobarSalidas = async (req, res) => {
+  productsCache = {};
+  productSearchCache = {};
   const { salidaId } = req.params;
 
   try {

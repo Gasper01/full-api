@@ -1,8 +1,6 @@
 import db from "../db/config.connection";
-
+import { productsCache, productSearchCache } from "../cache/cache";
 // Objeto para almacenar en caché los resultados de las consultas
-let productsCache = {};
-let productSearchCache = {};
 
 export const createProduct = async (req, res) => {
   const { nombre, cantidad, codigo, unidad } = req.body;
