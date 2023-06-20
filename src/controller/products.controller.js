@@ -1,9 +1,9 @@
 import db from "../db/config.connection";
-import { productsCache, productSearchCache } from "../cache/cache";
+import { productsCache, productSearchCache, clearCache } from "../cache/cache";
 // Objeto para almacenar en caché los resultados de las consultas
 
 export const createProduct = async (req, res) => {
-  const { nombre, cantidad, codigo, unidad } = req.body;
+  const { nombre, ImgUrl, cantidad, codigo, unidad, category } = req.body;
 
   try {
     const productcodigoExists = await db
@@ -18,12 +18,14 @@ export const createProduct = async (req, res) => {
     }
     const newProduct = {
       nombre,
+      ImgUrl,
       cantidad,
       codigo,
       unidad,
+      category,
     };
     await db.collection("products").add(newProduct);
-    productsCache = {};
+    clearCache();
 
     return res.status(200).json("ok");
   } catch (error) {
@@ -47,6 +49,11 @@ export const getProducts = async (req, res) => {
     const response = productsSnapshot.docs.map((doc) => ({
       id: doc.id,
       nombre: doc.data().nombre,
+      ImgUrl: doc.data().ImgUrl,
+      cantidad: doc.data().cantidad,
+      codigo: doc.data().codigo,
+      unidad: doc.data().unidad,
+      category: doc.data().category,
     }));
 
     // Almacenar los productos en la caché
