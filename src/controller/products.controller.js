@@ -101,6 +101,8 @@ export const getProductsById = async (req, res) => {
 };
 
 export const updateProductById = async (req, res) => {
+  const { nombre, ImgUrl, cantidad, codigo, unidad, category } = req.body;
+
   try {
     const products = db.collection("products").doc(req.params.productId);
     const productId = await products.get();
@@ -109,9 +111,16 @@ export const updateProductById = async (req, res) => {
       return res.status(404).json("No product found with id");
     }
 
-    const nombre = req.body;
+    const UpdateProduct = {
+      nombre,
+      ImgUrl,
+      cantidad,
+      codigo,
+      unidad,
+      category,
+    };
 
-    await products.update(nombre);
+    await products.update(UpdateProduct);
     clearCache();
     return res.status(200).json("ok");
   } catch (error) {
