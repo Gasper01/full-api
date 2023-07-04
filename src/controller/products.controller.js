@@ -13,7 +13,7 @@ export const createProduct = async (req, res) => {
       .get();
 
     if (!productcodigoExists.empty) {
-      // Si el usuario ya existe, devolver un error
+      // Si el producto ya existe, devolver un error
       return res.status(400).json({ message: "product codigo already exists" });
     }
     const newProduct = {
@@ -112,8 +112,7 @@ export const updateProductById = async (req, res) => {
     const nombre = req.body;
 
     await products.update(nombre);
-    productsCache = {};
-    productSearchCache = {};
+    clearCache();
     return res.status(200).json("ok");
   } catch (error) {
     return res
@@ -132,8 +131,7 @@ export const deleteProductById = async (req, res) => {
     }
 
     await products.delete();
-    productsCache = {};
-    productSearchCache = {};
+    clearCache();
     return res.status(200).json("ok");
   } catch (error) {
     return res
