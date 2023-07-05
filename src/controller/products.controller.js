@@ -101,7 +101,7 @@ export const getProductsById = async (req, res) => {
 };
 
 export const updateProductById = async (req, res) => {
-  const { nombre, ImgUrl, cantidad, codigo, unidad, category } = req.body;
+  const { nombre, ImgUrl, cantidad, unidad, category } = req.body;
 
   try {
     const products = db.collection("products").doc(req.params.productId);
@@ -115,7 +115,6 @@ export const updateProductById = async (req, res) => {
       nombre,
       ImgUrl,
       cantidad,
-      codigo,
       unidad,
       category,
     };
