@@ -27,7 +27,7 @@ export const createProduct = async (req, res) => {
     await db.collection("products").add(newProduct);
     clearCache();
 
-    return res.status(200).json("ok");
+    return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
       .status(500)
@@ -121,7 +121,7 @@ export const updateProductById = async (req, res) => {
 
     await products.update(UpdateProduct);
     clearCache();
-    return res.status(200).json("ok");
+    return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
       .status(500)
@@ -140,7 +140,7 @@ export const deleteProductById = async (req, res) => {
 
     await products.delete();
     clearCache();
-    return res.status(200).json("ok");
+    return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
       .status(500)

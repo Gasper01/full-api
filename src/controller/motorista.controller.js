@@ -28,7 +28,7 @@ export const createMotorista = async (req, res) => {
 
     await db.collection("motoristas").add(newMotorista);
     clearCacheMotorista();
-    return res.status(200).json("ok");
+    return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
       .status(500)
@@ -84,7 +84,7 @@ export const updateMotorista = async (req, res) => {
     // Limpiar la caché del motorista (si es necesario)
     clearCacheMotorista();
 
-    return res.status(200).json("ok");
+    return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
       .status(500)
