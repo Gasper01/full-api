@@ -70,11 +70,12 @@ export const signUp = async (req, res) => {
       email,
       password: hashedPassword,
       rol,
+      anable: true,
     };
 
     await db.collection("users").add(newUser);
 
-    return res.status(200).json({ message: "User created successfully" });
+    return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
       .status(500)

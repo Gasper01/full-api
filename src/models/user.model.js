@@ -1,5 +1,5 @@
-import Joi from 'joi';
-import bcrypt from 'bcryptjs';
+import Joi from "joi";
+import bcrypt from "bcryptjs";
 
 const userModel = {
   userdata: Joi.object({
@@ -7,7 +7,8 @@ const userModel = {
     username: Joi.string().min(3).required(),
     email: Joi.string().min(3).required(),
     password: Joi.string().min(3).required(),
-    rol: Joi.string().min(3).required(),
+    rol: Joi.string(),
+    anable: Joi.boolean(),
   }),
 
   hashPassword: (password) => {

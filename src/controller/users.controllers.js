@@ -1,10 +1,10 @@
 import db from "../db/config.connection";
+import userModel from "../models/user.model";
 export const getUser = async (req, res) => {
   try {
     const usersSnapshot = await db.collection("users").get();
     const userDataPromises = usersSnapshot.docs.map(async (doc) => {
       const userId = doc.id;
-      const userCacheData = userCache[userId];
 
       const userData = {
         id: userId,
@@ -12,6 +12,7 @@ export const getUser = async (req, res) => {
         email: doc.data().email,
         imgUrl: doc.data().imgUrl,
         rol: doc.data().rol,
+        anable: doc.data().anable,
       };
 
       return userData;
@@ -66,6 +67,43 @@ export const deleteUserById = async (req, res) => {
     await users.delete();
 
     return res.status(200).json("ok");
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "An unexpected error occurred on the server" });
+  }
+};
+
+export const UpdateUser = async (req, res) => {
+  const { userId } = req.params; // Obtén el ID de la salida de la solicitud
+
+  const { imgUrl, username, password, rol, anable } = req.body;
+  try {
+    const userRef = db.collection("users").doc(userId);
+    const userSnapshot = await userRef.get();
+
+    if (!userSnapshot.exists) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const existingData = userSnapshot.data();
+    const updatedUser = {
+      imgUrl:
+        imgUrl !== undefined && imgUrl !== "" ? imgUrl : existingData.imgUrl,
+      username:
+        username !== undefined && username !== ""
+          ? username
+          : existingData.username,
+      rol: rol !== undefined && rol !== "" ? rol : existingData.rol,
+      anable: anable !== undefined ? anable : existingData.anable,
+      password: password
+        ? userModel.hashPassword(password)
+        : existingData.password,
+    };
+
+    await userRef.update(updatedUser);
+
+    return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
       .status(500)
