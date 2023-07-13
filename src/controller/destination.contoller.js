@@ -2,6 +2,7 @@ import db from "../db/config.connection";
 
 let cachedDestinations = null;
 let destinationsCache = {};
+
 let locationCache = {};
 
 export const createDestinations = async (req, res) => {
@@ -103,7 +104,7 @@ export const getLocationByDestination = async (req, res) => {
       if (!locationSnapshot.empty) {
         const response = locationSnapshot.docs.map((doc) => ({
           id: doc.id,
-          idDestination: doc.data.idDestination,
+          idDestination: doc.data().idDestination,
           locationName: doc.data().locationName,
           accountNumber: doc.data().accountNumber,
         }));
