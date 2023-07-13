@@ -5,7 +5,7 @@ export const GetTotales = async (req, res) => {
   try {
     if (TotalesCache.data) {
       // Si los destinos están en la caché, devolver la respuesta de la caché
-      return res.status(200).json(TotalesCache);
+      return res.status(200).json(TotalesCache.data);
     }
 
     const salidasPromise = db.collection("Salidas").get();

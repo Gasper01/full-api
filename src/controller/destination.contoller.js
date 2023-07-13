@@ -72,7 +72,7 @@ export const getDestinations = async (req, res) => {
   try {
     if (cachedDestinations.data) {
       // Si los destinos están en la caché, devolver la respuesta de la caché
-      return res.status(200).json(cachedDestinations);
+      return res.status(200).json(cachedDestinations.data);
     }
     const destinationsPromise = db.collection("destinations").get();
 
@@ -88,7 +88,6 @@ export const getDestinations = async (req, res) => {
 
     return res.status(200).json(response);
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json({ message: "An unexpected error occurred on the server" });
