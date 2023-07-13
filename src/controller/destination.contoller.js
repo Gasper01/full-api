@@ -1,9 +1,11 @@
 import db from "../db/config.connection";
 
-let cachedDestinations = null;
-let destinationsCache = {};
-
-let locationCache = {};
+import {
+  destinationsCache,
+  cachedDestinations,
+  clearCacheDestination,
+  locationCache,
+} from "../cache/cache";
 
 export const createDestinations = async (req, res) => {
   const { destinationName } = req.body;
@@ -31,8 +33,7 @@ export const createDestinations = async (req, res) => {
     };
 
     await db.collection("destinations").add(newDestination);
-    cachedDestinations = null;
-    destinationsCache = {};
+    clearCacheDestination();
     return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
@@ -41,9 +42,35 @@ export const createDestinations = async (req, res) => {
   }
 };
 
+export const updateDestination = async (req, res) => {
+  const { id } = req.params; // Obtén el ID del motorista de los parámetros de la ruta
+  const { destinationName } = req.body; // Obtén los datos actualizados de la solicitud
+  try {
+    // Verificar si el motorista existe
+    const DestinationRef = db.collection("destinations").doc(id);
+    const DestinationDoc = await DestinationRef.get();
+
+    if (!DestinationDoc.exists) {
+      // Si el motorista no existe, devuelve un error
+      return res.status(404).json({ message: "destination not found" });
+    }
+
+    // Actualiza los campos cars y placa del motorista
+    await DestinationRef.update({ destinationName });
+
+    // Limpiar la caché del motorista (si es necesario)
+    clearCacheDestination();
+
+    return res.status(200).json({ message: "ok" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "An unexpected error occurred on the server" });
+  }
+};
 export const getDestinations = async (req, res) => {
   try {
-    if (cachedDestinations) {
+    if (cachedDestinations.data) {
       // Si los destinos están en la caché, devolver la respuesta de la caché
       return res.status(200).json(cachedDestinations);
     }
@@ -56,11 +83,12 @@ export const getDestinations = async (req, res) => {
       destinationName: doc.data().destinationName,
     }));
 
-    // Almacenar los destinos en la caché
-    cachedDestinations = response;
+    //Almacenar los destinos en la caché
+    cachedDestinations.data = response;
 
     return res.status(200).json(response);
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: "An unexpected error occurred on the server" });

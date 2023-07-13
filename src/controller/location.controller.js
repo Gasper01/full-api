@@ -1,3 +1,4 @@
+import { clearCacheDestination } from "../cache/cache";
 import db from "../db/config.connection";
 
 export const createLocations = async (req, res) => {
@@ -10,6 +11,7 @@ export const createLocations = async (req, res) => {
       idDestination,
     };
     await db.collection("locations").add(newLocation);
+    clearCacheDestination();
     return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
