@@ -8,6 +8,7 @@ import {
   createDestinations,
   getDestinations,
   getLocationByDestination,
+  getLocationById,
   updateDestination,
 } from "../controller/destination.contoller";
 
@@ -17,6 +18,7 @@ const router = Router();
 
 router.get("/", getDestinations);
 router.get("/:search", getLocationByDestination);
+router.get("/locationview/:locationId", getLocationById);
 
 router.post(
   "/locations",

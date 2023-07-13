@@ -5,6 +5,7 @@ import {
   cachedDestinations,
   clearCacheDestination,
   locationCache,
+  locationCache2,
 } from "../cache/cache";
 
 export const createDestinations = async (req, res) => {
@@ -43,22 +44,17 @@ export const createDestinations = async (req, res) => {
 };
 
 export const updateDestination = async (req, res) => {
-  const { id } = req.params; // Obtén el ID del motorista de los parámetros de la ruta
-  const { destinationName } = req.body; // Obtén los datos actualizados de la solicitud
+  const { id } = req.params;
+  const { destinationName } = req.body;
   try {
-    // Verificar si el motorista existe
-    const DestinationRef = db.collection("destinations").doc(id);
-    const DestinationDoc = await DestinationRef.get();
+    const destinationRef = db.collection("destinations").doc(id);
+    const destinationDoc = await destinationRef.get();
 
-    if (!DestinationDoc.exists) {
-      // Si el motorista no existe, devuelve un error
+    if (!destinationDoc.exists) {
       return res.status(404).json({ message: "destination not found" });
     }
 
-    // Actualiza los campos cars y placa del motorista
-    await DestinationRef.update({ destinationName });
-
-    // Limpiar la caché del motorista (si es necesario)
+    await destinationRef.update({ destinationName });
     clearCacheDestination();
 
     return res.status(200).json({ message: "ok" });
@@ -149,6 +145,46 @@ export const getLocationByDestination = async (req, res) => {
     } else {
       return res.status(403).json({
         message: "No se encontró el destino con el nombre especificado.",
+      });
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "An unexpected error occurred on the server" });
+  }
+};
+
+export const getLocationById = async (req, res) => {
+  try {
+    const locationId = req.params.locationId;
+
+    // Verificar si las ubicaciones están en la caché
+    if (locationCache2[locationId]) {
+      return res.status(200).json(locationCache2[locationId]);
+    }
+
+    const locationSnapshotPromise = db
+      .collection("locations")
+      .where("idDestination", "==", locationId)
+      .get();
+
+    const [locationSnapshot] = await Promise.all([locationSnapshotPromise]);
+
+    if (!locationSnapshot.empty) {
+      const response = locationSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        idDestination: doc.data().idDestination,
+        locationName: doc.data().locationName,
+        accountNumber: doc.data().accountNumber,
+      }));
+
+      // Almacenar el destino y las ubicaciones en la caché
+      locationCache2[locationId] = response;
+
+      return res.status(200).json(response);
+    } else {
+      return res.status(403).json({
+        message: "No se encontró la ubicación correspondiente al destino.",
       });
     }
   } catch (error) {

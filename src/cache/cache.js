@@ -5,6 +5,7 @@ export let motoristasCache = {};
 export let cachedDestinations = {};
 export let destinationsCache = {};
 export let locationCache = {};
+export let locationCache2 = {};
 export let TotalesCache = {};
 
 export const clearCache = () => {
@@ -27,5 +28,6 @@ export const clearCacheDestination = () => {
   cachedDestinations = {};
   destinationsCache = {};
   locationCache = {};
+  locationCache2 = {};
   TotalesCache = {};
 };
