@@ -33,7 +33,7 @@ export const createDestinations = async (req, res) => {
     await db.collection("destinations").add(newDestination);
     cachedDestinations = null;
     destinationsCache = {};
-    return res.status(200).json("ok");
+    return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res
       .status(500)
