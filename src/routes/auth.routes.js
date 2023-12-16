@@ -8,8 +8,7 @@ const router = Router();
 
 router.post(
   '/singup',
-  verifyToken,
-  verifyRoles,
+ 
   dataValidateHandler(userModel.userdata),
   signUp
 );
