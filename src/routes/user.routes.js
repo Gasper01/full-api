@@ -9,7 +9,7 @@ import { verifyRoles } from "../middlewares/verifyRoles";
 import { verifyToken } from "../middlewares/verifyJwt";
 const router = Router();
 
-router.get("/", getUser);
+router.get("/",verifyToken, verifyRoles, getUser);
 router.delete("/:userId", verifyToken, deleteUserById);
 router.get("/verifyuser", verifyToken, getUserById);
 router.put("/:userId", verifyToken, UpdateUser);
